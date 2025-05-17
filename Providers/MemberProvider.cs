@@ -7,7 +7,7 @@ namespace fabsg0.Web.TeamManagement.Blazor.Providers;
 
 public class MemberProvider(TeamManagementContext dbContext, MembershipProvider membershipProvider)
 {
-    public async Task<List<MemberModel>> GetMembers(CancellationToken cancellationToken = default)
+    public async Task<List<MemberModel>> GetMembers(int year, CancellationToken cancellationToken = default)
     {
         var members = await dbContext.Members
             .AsNoTracking()
@@ -25,7 +25,7 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
                 UpdatedAt = x.UpdatedAt,
                 DepartmentMemberships = x.DepartmentMembers.ToList(),
                 CurrentMembershipFee = x.MembershipFees
-                    .FirstOrDefault(y => y.Year == DateTime.Now.Year)
+                    .FirstOrDefault(y => y.Year == year)!
             })
             .ToListAsync(cancellationToken);
 
@@ -36,10 +36,11 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
     {
         var memberId = Guid.NewGuid();
         member.Id = memberId;
+        member.UpdatedAt = DateTimeOffset.Now;
         
         await dbContext.Members.AddAsync(member, cancellationToken);
-        await membershipProvider.CreateMembership(memberId, cancellationToken); // Creates a membership entry
         await dbContext.SaveChangesAsync(cancellationToken);
+        await membershipProvider.CreateMembership(memberId, cancellationToken); // Creates a membership entry
     }
 
     public async Task UpdateMember(MemberModel member, CancellationToken cancellationToken = default)
@@ -64,10 +65,15 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
     public async Task DeleteMember(Guid memberId, CancellationToken cancellationToken = default)
     {
         var member = await dbContext.Members
+            .Include(member => member.MembershipFees)
+            .Include(member => member.DepartmentMembers)
             .SingleOrDefaultAsync(x => x.Id == memberId, cancellationToken);
 
         if (member == null) throw new Exception("Member not found.");
-
+        
+        if (member.MembershipFees.Count != 0) dbContext.MembershipFees.RemoveRange(member.MembershipFees);
+        if (member.DepartmentMembers.Count != 0) dbContext.DepartmentMembers.RemoveRange(member.DepartmentMembers);
+        
         dbContext.Members.Remove(member);
         await dbContext.SaveChangesAsync(cancellationToken);
     }

@@ -5,8 +5,8 @@ namespace fabsg0.Web.TeamManagement.Blazor.Models;
 public class MemberModel
 {
     public Guid Id { get; set; }
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public DateOnly BirthDate { get; set; }
     public string? Street { get; set; }
     public string? HouseNumber { get; set; }
@@ -14,5 +14,5 @@ public class MemberModel
     public string? City { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
     public List<DepartmentMember>? DepartmentMemberships { get; set; }
-    public MembershipFee? CurrentMembershipFee { get; set; }
+    public MembershipFee CurrentMembershipFee { get; set; }
 }

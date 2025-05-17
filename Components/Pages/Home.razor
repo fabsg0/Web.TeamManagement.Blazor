@@ -1,7 +1,159 @@
 ﻿@page "/"
+@using fabsg0.Web.TeamManagement.Blazor.Models
+@using fabsg0.Web.TeamManagement.Blazor.Providers
+@using fabsg0.Web.TeamManagement.Blazor.Components.MemberPopups
+@rendermode InteractiveServer
+@inject MemberProvider MemberProvider
+@inject MembershipProvider MembershipProvider
+@inject ILogger<Home> Logger
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Home - TeamManagement</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="mb-0">👥 Members</h2>
+            <select class="form-select form-select-sm w-auto"
+                    @bind="_year"
+                    @bind:after="OnYearChanged">
+                @foreach (var year in _availableYears)
+                {
+                    <option value="@year">@year</option>
+                }
+            </select>
+        </div>
 
-Welcome to your new app.
+        <button class="btn btn-success" @onclick="@(() => _showCreateMemberPopup = true)">
+            <i class="bi bi-plus-lg"></i> Add Member
+        </button>
+    </div>
+
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>Membership</th>
+                        <th>Birthdate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var member in _members)
+                {
+                    <tr>
+                        <td>@member.Id</td>
+                        <td>@member.FirstName @member.LastName</td>
+                        <td>
+                            @member.Street @member.HouseNumber<br />
+                            <small class="text-muted">@member.ZipCode @member.City</small>
+                        </td>
+                        <td>
+                            @if (member.CurrentMembershipFee is not null)
+                            {
+                                <button type="button" @onclick="@(() => ChangePaymentStatus(member.Id))" class="pe-auto btn btn-@(member.CurrentMembershipFee.IsPaid ? "success" : "danger")">
+                                    @(member.CurrentMembershipFee.IsPaid ? "Paid" : "Not Paid")
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" disabled="disabled" class="btn btn-secondary">Unknown</button>
+                            }
+                        </td>
+                        <td>@member.BirthDate.ToString("dd.MM.yyyy")</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-outline-primary btn-sm" title="Edit"
+                                        @onclick="@(() => { _selectedMember = member; _showUpdateMemberPopup = true; })">
+                                    Update
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm ms-1" title="Delete"
+                                        @onclick="@(() => { _selectedMember = member; _showDeleteMemberPopup = true; })">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (_showCreateMemberPopup)
+{
+    <CreateMemberPopup OnClose="async () =>
+    {
+        _showCreateMemberPopup = false;
+        await FetchData();
+    }" />
+}
+
+@if (_showUpdateMemberPopup)
+{
+    <UpdateMemberPopup Member="_selectedMember" OnClose="async () =>
+    {
+        _showUpdateMemberPopup = false;
+        await FetchData();
+    }" />
+}
+
+@if (_showDeleteMemberPopup)
+{
+    <DeleteMemberPopup MemberId="_selectedMember.Id" OnClose="async () =>
+    {
+        _showDeleteMemberPopup = false;
+        await FetchData();
+    }" />
+}
+
+@code {
+    private List<MemberModel> _members = [];
+    private bool _showCreateMemberPopup;
+    private bool _showUpdateMemberPopup;
+    private bool _showDeleteMemberPopup;
+    private MemberModel _selectedMember = new();
+
+    private int _year = DateTime.Now.Year;
+    private List<int> _availableYears = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _availableYears = Enumerable.Range(DateTime.Now.Year - 9, 10).Reverse().ToList();
+        await FetchData();
+    }
+
+    private async Task OnYearChanged()
+    {
+        await FetchData();
+    }
+
+    private async Task FetchData()
+    {
+        try
+        {
+            _members = await MemberProvider.GetMembers(_year);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to fetch member data.");
+        }
+    }
+
+    private async Task ChangePaymentStatus(Guid memberId)
+    {
+        try
+        {
+            await MembershipProvider.ChangePaymentStatusForYear(memberId, _year);
+            await FetchData();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to change payment status.");
+        }
+    }
+}

@@ -13,8 +13,10 @@ public class MembershipProvider(TeamManagementContext dbContext)
 
         if (member == null) throw new Exception("Member not found.");
 
+        var memberAge = DateTime.Now.Year - member.Birthdate.Year;
+
         var membershipFeeDefinition = await dbContext.MembershipFeeDefinitions
-            .SingleOrDefaultAsync(x => x.MinAge <= member.Birthdate.Year && x.MaxAge >= member.Birthdate.Year,
+            .SingleOrDefaultAsync(x => x.MinAge <= memberAge && x.MaxAge >= memberAge,
                 cancellationToken);
 
         if (membershipFeeDefinition == null) throw new Exception("Membership fee definition not found.");
@@ -47,7 +49,7 @@ public class MembershipProvider(TeamManagementContext dbContext)
                     cancellationToken);
 
             if (membershipFeeDefinition == null) throw new Exception("Membership fee definition not found.");
-            
+
             var membership = new MembershipFee
             {
                 MemberId = member.Id,
@@ -58,7 +60,18 @@ public class MembershipProvider(TeamManagementContext dbContext)
 
             await dbContext.MembershipFees.AddAsync(membership, cancellationToken);
         }
-        
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task ChangePaymentStatusForYear(Guid memberId, int year, CancellationToken cancellationToken = default)
+    {
+        var memberShip = await dbContext.MembershipFees
+            .SingleOrDefaultAsync(x => x.MemberId == memberId && x.Year == year, cancellationToken);
+
+        if (memberShip == null) throw new Exception("Membership fee not found.");
+
+        memberShip.IsPaid = !memberShip.IsPaid;
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

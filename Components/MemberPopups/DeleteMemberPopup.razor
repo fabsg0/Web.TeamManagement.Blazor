@@ -1,0 +1,32 @@
+﻿@using fabsg0.Web.TeamManagement.Blazor.Components.CustomComponents
+@using fabsg0.Web.TeamManagement.Blazor.Providers
+@inject MemberProvider MemberProvider
+@inject ILogger<DeleteMemberPopup> Logger
+
+<Popup OnClose="OnClose" Title="Delete member">
+    
+    <h3>Do you really want to delete this member?</h3>
+
+    <button type="submit" class="btn btn-danger" @onclick="DeleteMember">Delete</button>
+    <button type="button" class="btn btn-secondary" @onclick="OnClose">Cancel</button>
+</Popup>
+
+@code {
+
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public required Guid MemberId { get; set; }
+
+    private async Task DeleteMember()
+    {
+        try
+        {
+            await MemberProvider.DeleteMember(MemberId);
+            await OnClose.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to delete member.");
+        }
+    }
+
+}

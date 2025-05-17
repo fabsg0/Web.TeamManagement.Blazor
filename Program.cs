@@ -1,4 +1,5 @@
 using fabsg0.Web.TeamManagement.Blazor.Components;
+using fabsg0.Web.TeamManagement.Blazor.Database;
 using fabsg0.Web.TeamManagement.Blazor.Providers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDbContext<TeamManagementContext>();
 
 builder.Services.AddScoped<MemberProvider>();
 builder.Services.AddScoped<MembershipProvider>();
