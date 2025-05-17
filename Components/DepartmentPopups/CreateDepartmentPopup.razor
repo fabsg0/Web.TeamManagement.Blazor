@@ -1,0 +1,42 @@
+﻿@using fabsg0.Web.TeamManagement.Blazor.Components.CustomComponents
+@using fabsg0.Web.TeamManagement.Blazor.Entities
+@using fabsg0.Web.TeamManagement.Blazor.Providers
+@inject DepartmentProvider DepartmentProvider
+@inject ILogger<CreateDepartmentPopup> Logger
+
+<Popup OnClose="OnClose" Title="Create department">
+    <EditForm Model="@_department" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="_department.Name" />
+            <ValidationMessage For="@(() => _department.Name)" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Save</button>
+        <button type="button" class="btn btn-danger" @onclick="OnClose">Cancel</button>
+    </EditForm>
+</Popup>
+
+@code {
+
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private Department _department = new();
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await DepartmentProvider.CreateDepartment(_department);
+            await OnClose.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to create department.");
+        }
+    }
+
+}

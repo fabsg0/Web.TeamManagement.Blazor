@@ -1,0 +1,32 @@
+﻿@using fabsg0.Web.TeamManagement.Blazor.Components.CustomComponents
+@using fabsg0.Web.TeamManagement.Blazor.Providers
+@inject DepartmentProvider DepartmentProvider
+@inject ILogger<DeleteDepartmentPopup> Logger
+
+<Popup OnClose="OnClose" Title="Delete department">
+    
+    <h3>Do you really want to delete this department?</h3>
+
+    <button type="submit" class="btn btn-danger" @onclick="DeleteMember">Delete</button>
+    <button type="button" class="btn btn-secondary" @onclick="OnClose">Cancel</button>
+</Popup>
+
+@code {
+
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public required Guid DepartmentId { get; set; }
+
+    private async Task DeleteMember()
+    {
+        try
+        {
+            await DepartmentProvider.DeleteDepartment(DepartmentId);
+            await OnClose.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to delete department.");
+        }
+    }
+
+}

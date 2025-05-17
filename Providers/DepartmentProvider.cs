@@ -11,6 +11,28 @@ public class DepartmentProvider(TeamManagementContext dbContext)
         await dbContext.Departments.AddAsync(department, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task UpdateDepartment(Department department, CancellationToken cancellationToken = default)
+    {
+        var departmentToUpdate = await dbContext.Departments
+            .SingleOrDefaultAsync(x => x.Id == department.Id, cancellationToken);
+        
+        if (departmentToUpdate == null) throw new Exception("Department not found.");
+        
+        departmentToUpdate.Name = department.Name;
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteDepartment(Guid departmentId, CancellationToken cancellationToken = default)
+    {
+        var department = await dbContext.Departments
+            .SingleOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
+
+        if (department == null) throw new Exception("Department not found.");
+        
+        dbContext.Departments.Remove(department);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
     
     public async Task<List<Department>> GetDepartments(CancellationToken cancellationToken = default)
     {

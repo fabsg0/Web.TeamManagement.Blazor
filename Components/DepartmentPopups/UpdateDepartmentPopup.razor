@@ -1,0 +1,41 @@
+﻿@using fabsg0.Web.TeamManagement.Blazor.Components.CustomComponents
+@using fabsg0.Web.TeamManagement.Blazor.Entities
+@using fabsg0.Web.TeamManagement.Blazor.Providers
+@inject DepartmentProvider DepartmentProvider
+@inject ILogger<UpdateDepartmentPopup> Logger
+
+<Popup OnClose="OnClose" Title="Update department">
+    <EditForm Model="@Department" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="Department.Name"/>
+            <ValidationMessage For="@(() => Department.Name)"/>
+        </div>
+
+        <button type="submit" class="btn btn-success">Save</button>
+        <button type="button" class="btn btn-danger" @onclick="OnClose">Cancel</button>
+    </EditForm>
+</Popup>
+
+@code {
+
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public required Department Department { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await DepartmentProvider.UpdateDepartment(Department);
+            await OnClose.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to update department.");
+        }
+    }
+
+}

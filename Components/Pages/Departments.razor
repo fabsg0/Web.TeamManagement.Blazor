@@ -1,0 +1,113 @@
+@page "/Departments"
+@using fabsg0.Web.TeamManagement.Blazor.Entities
+@using fabsg0.Web.TeamManagement.Blazor.Providers
+@using fabsg0.Web.TeamManagement.Blazor.Components.DepartmentPopups
+@rendermode InteractiveServer
+@inject DepartmentProvider DepartmentProvider
+@inject ILogger<Departments> Logger
+
+<h3>Departments</h3>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <button class="btn btn-success" @onclick="@(() => _showCreateDepartmentPopup = true)">
+        <i class="bi bi-plus-lg"></i> Add Department
+    </button>
+</div>
+
+@if (_isLoading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var department in _departments)
+                {
+                    <tr>
+                        <td>@department.Id</td>
+                        <td>@department.Name</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-outline-primary btn-sm" title="Edit"
+                                        @onclick="@(() => { _selectedDepartment = department; _showUpdateDepartmentPopup = true; })">
+                                    Update
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm ms-1" title="Delete"
+                                        @onclick="@(() => { _selectedDepartment = department; _showDeleteDepartmentPopup = true; })">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (_showCreateDepartmentPopup)
+{
+    <CreateDepartmentPopup OnClose="@(async () => { _showCreateDepartmentPopup = false; await FetchData(); })"/>
+}
+
+@if (_showUpdateDepartmentPopup)
+{
+    <UpdateDepartmentPopup Department="_selectedDepartment"
+                           OnClose="@(async () => { _showUpdateDepartmentPopup = false; await FetchData(); })"/>
+}
+
+@if (_showDeleteDepartmentPopup)
+{
+    <DeleteDepartmentPopup DepartmentId="_selectedDepartment.Id"
+                           OnClose="@(async () => { _showDeleteDepartmentPopup = false; await FetchData(); })"/>
+}
+
+
+@code {
+
+    private List<Department> _departments = [];
+    private bool _isLoading;
+    private Department _selectedDepartment = new();
+
+    private bool _showCreateDepartmentPopup;
+    private bool _showUpdateDepartmentPopup;
+    private bool _showDeleteDepartmentPopup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchData();
+    }
+
+    private async Task FetchData()
+    {
+        _isLoading = true;
+        try
+        {
+            _departments = await DepartmentProvider.GetDepartments();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to fetch departments.");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+}
