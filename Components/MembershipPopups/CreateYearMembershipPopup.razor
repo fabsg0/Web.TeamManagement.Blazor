@@ -1,0 +1,38 @@
+@using fabsg0.Web.TeamManagement.Blazor.Components.CustomComponents
+@using fabsg0.Web.TeamManagement.Blazor.Providers
+@inject MembershipProvider MembershipProvider
+@inject ILogger<CreateYearMembershipPopup> Logger
+
+<Popup Title="Create year membership" OnClose="OnClose">
+    <div class="mb-3">
+        <label for="yearInput" class="form-label">Enter Year</label>
+        <input type="number"
+               id="yearInput"
+               class="form-control"
+               @bind="_selectedYear"
+               min="2000"
+               max="2100"
+               placeholder="e.g. 2025"/>
+    </div>
+
+    <button class="btn btn-primary" @onclick="CreateYearMembership">Create</button>
+</Popup>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private int _selectedYear;
+
+    private async Task CreateYearMembership()
+    {
+        try
+        {
+            await MembershipProvider.CreateMembershipsForYear(_selectedYear);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to create year membership.");
+        }
+    }
+
+}

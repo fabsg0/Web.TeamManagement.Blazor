@@ -15,6 +15,8 @@ public partial class MembershipFee
 
     public int Year { get; set; }
 
+    public DateTimeOffset PaidAt { get; set; }
+
     public virtual Member? Member { get; set; }
 
     public virtual MembershipFeeDefinition? MemberhsipFeeDefinition { get; set; }

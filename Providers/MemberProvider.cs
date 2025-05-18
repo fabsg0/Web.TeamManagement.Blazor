@@ -40,7 +40,7 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
         
         await dbContext.Members.AddAsync(member, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        await membershipProvider.CreateMembership(memberId, cancellationToken); // Creates a membership entry
+        await membershipProvider.CreateMembershipForYear(memberId, cancellationToken); // Creates membership entries for all years
     }
 
     public async Task UpdateMember(MemberModel member, CancellationToken cancellationToken = default)
