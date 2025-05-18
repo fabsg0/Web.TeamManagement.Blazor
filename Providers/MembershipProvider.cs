@@ -28,7 +28,8 @@ public class MembershipProvider(TeamManagementContext dbContext)
         {
             if (member.MembershipFees.Any(x => x.Year == year)) continue;
 
-            var age = year - member.Birthdate.Year;
+            if (member.Birthdate == default) continue;
+            var age = CalculateAge(member.Birthdate, year);
             var feeDefinition = feeDefinitions.SingleOrDefault(x => x.MinAge <= age && x.MaxAge >= age);
 
             if (feeDefinition == null)
@@ -64,7 +65,8 @@ public class MembershipProvider(TeamManagementContext dbContext)
         {
             if (member.MembershipFees.Any(x => x.Year == year)) continue;
 
-            var age = year - member.Birthdate.Year;
+            if (member.Birthdate == default) continue;
+            var age = CalculateAge(member.Birthdate, year);
             var feeDefinition = feeDefinitions.SingleOrDefault(x => x.MinAge <= age && x.MaxAge >= age);
 
             if (feeDefinition == null)
@@ -85,7 +87,15 @@ public class MembershipProvider(TeamManagementContext dbContext)
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    private static int CalculateAge(DateOnly birthdate, int year)
+    {
+        var referenceDate = new DateOnly(year, 1, 1);
+        var age = referenceDate.Year - birthdate.Year;
+        if (birthdate > referenceDate.AddYears(-age)) age--;
+        return age;
+    }
 
+    
     public async Task ChangePaymentStatusForYear(Guid memberId, int year, CancellationToken cancellationToken = default)
     {
         var memberShip = await dbContext.MembershipFees

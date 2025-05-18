@@ -1,0 +1,74 @@
+@using fabsg0.Web.TeamManagement.Blazor.Entities
+@using fabsg0.Web.TeamManagement.Blazor.Providers
+@using fabsg0.Web.TeamManagement.Blazor.Components.CustomComponents
+@inject ILogger<MemberImportPopup> Logger
+@inject MemberProvider MemberProvider
+
+<Popup Title="Import Members" OnClose="OnClose">
+    <div class="mb-3">
+        <label class="form-label">Upload CSV File</label>
+        <InputFile OnChange="HandleFileSelected" accept=".csv" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(_importResult))
+    {
+        <div class="alert alert-info">@_importResult</div>
+    }
+
+    <div class="mt-3 d-flex justify-content-end gap-2">
+        <button class="btn btn-secondary" @onclick="OnClose">Close</button>
+    </div>
+</Popup>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private string? _importResult;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.File;
+            using var reader = new StreamReader(file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024));
+            var content = await reader.ReadToEndAsync();
+
+            var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var importedCount = 0;
+
+            foreach (var line in lines.Skip(1)) // skip header
+            {
+                var fields = line.Split(';');
+
+                if (fields.Length < 6) continue;
+
+                var member = new Member
+                {
+                    FirstName = fields[0].Trim(),
+                    LastName = fields[1].Trim(),
+                    Street = fields.ElementAtOrDefault(2)?.Trim(),
+                    HouseNumber = fields.ElementAtOrDefault(3)?.Trim(),
+                    ZipCode = int.TryParse(fields.ElementAtOrDefault(4), out var zip) ? zip : 0,
+                    City = fields.ElementAtOrDefault(5)?.Trim(),
+                    Sex = fields[6].Trim(),
+                    Birthdate = DateTime.TryParse(fields[7], out var dob)
+                        ? DateOnly.FromDateTime(dob)
+                        : default,
+                    Email = fields[8].Trim(),
+                    Telephone = fields[9].Trim(),
+                    
+                };
+
+                await MemberProvider.CreateMember(member);
+                importedCount++;
+            }
+
+            _importResult = $"Successfully imported {importedCount} members.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "CSV import failed.");
+            _importResult = "Import failed. Please check your CSV format.";
+        }
+    }
+}

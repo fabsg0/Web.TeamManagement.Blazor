@@ -31,6 +31,10 @@
             <button class="btn btn-success shadow-sm" @onclick="@(() => _showCreateMemberPopup = true)">
                 ➕ Add Member
             </button>
+            
+            <button class="btn btn-success shadow-sm" @onclick="@(() => _showImportPopup = true)">
+                ➕ Import Members
+            </button>
         </div>
     </div>
 
@@ -146,6 +150,11 @@
     <CreateYearMembershipPopup OnClose="async () => { _showCreateYearMembershipPopup = false; await FetchData(); }"/>
 }
 
+@if (_showImportPopup)
+{
+    <MemberImportPopup OnClose="async () => { _showImportPopup = false; await FetchData(); }"/>
+}
+
 @code {
     private List<MemberModel> _members = [];
     private bool _isLoading;
@@ -153,6 +162,7 @@
     private bool _showUpdateMemberPopup;
     private bool _showDeleteMemberPopup;
     private bool _showCreateYearMembershipPopup;
+    private bool _showImportPopup;
     private MemberModel _selectedMember = new();
 
     private int _year = DateTime.Now.Year;
