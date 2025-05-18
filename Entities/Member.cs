@@ -20,6 +20,10 @@ public class Member
 
     public DateTimeOffset? UpdatedAt { get; set; }
 
+    public string? Email { get; set; }
+
+    public string? Telephone { get; set; }
+
     public virtual ICollection<DepartmentMember> DepartmentMembers { get; set; } = new List<DepartmentMember>();
 
     public virtual ICollection<MembershipFee> MembershipFees { get; set; } = new List<MembershipFee>();

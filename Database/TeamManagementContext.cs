@@ -54,10 +54,12 @@ public partial class TeamManagementContext : DbContext
         {
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.City).HasMaxLength(50);
+            entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.FirstName).HasMaxLength(50);
             entity.Property(e => e.HouseNumber).HasMaxLength(50);
             entity.Property(e => e.LastName).HasMaxLength(50);
             entity.Property(e => e.Street).HasMaxLength(100);
+            entity.Property(e => e.Telephone).HasMaxLength(50);
         });
 
         modelBuilder.Entity<MembershipFee>(entity =>
