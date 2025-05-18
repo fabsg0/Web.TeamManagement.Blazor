@@ -12,12 +12,17 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
         var members = await dbContext.Members
             .AsNoTracking()
             .Include(x => x.MembershipFees)
+            .Include(x => x.DepartmentMembers)
+            .ThenInclude(x => x.Department)
             .Select(x => new MemberModel
             {
                 Id = x.Id,
                 FirstName = x.FirstName,
                 LastName = x.LastName,
+                Sex = x.Sex,
                 BirthDate = x.Birthdate,
+                Email = x.Email,
+                Telephone = x.Telephone,
                 Street = x.Street,
                 HouseNumber = x.HouseNumber,
                 ZipCode = x.ZipCode,
@@ -56,6 +61,9 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
         memberToUpdate.FirstName = member.FirstName;
         memberToUpdate.LastName = member.LastName;
         memberToUpdate.Birthdate = member.BirthDate;
+        memberToUpdate.Sex = member.Sex;
+        memberToUpdate.Email = member.Email;
+        memberToUpdate.Telephone = member.Telephone;
         memberToUpdate.Street = member.Street;
         memberToUpdate.HouseNumber = member.HouseNumber;
         memberToUpdate.ZipCode = member.ZipCode;

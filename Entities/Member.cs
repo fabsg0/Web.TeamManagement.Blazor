@@ -24,6 +24,8 @@ public class Member
 
     public string? Telephone { get; set; }
 
+    public string? Sex { get; set; } = null!;
+
     public virtual ICollection<DepartmentMember> DepartmentMembers { get; set; } = new List<DepartmentMember>();
 
     public virtual ICollection<MembershipFee> MembershipFees { get; set; } = new List<MembershipFee>();

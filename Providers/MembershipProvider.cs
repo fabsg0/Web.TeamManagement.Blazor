@@ -6,31 +6,14 @@ namespace fabsg0.Web.TeamManagement.Blazor.Providers;
 
 public class MembershipProvider(TeamManagementContext dbContext)
 {
-    public async Task CreateMembership(Guid memberId, CancellationToken cancellationToken = default)
+    public async Task<List<int>> GetMembershipYears(CancellationToken cancellationToken = default)
     {
-        var member = await dbContext.Members
-            .SingleOrDefaultAsync(x => x.Id == memberId, cancellationToken);
+        var years = await dbContext.MembershipFees
+            .Select(x => x.Year)
+            .Distinct()
+            .ToListAsync(cancellationToken);
 
-        if (member == null) throw new Exception("Member not found.");
-
-        var memberAge = DateTime.Now.Year - member.Birthdate.Year;
-
-        var membershipFeeDefinition = await dbContext.MembershipFeeDefinitions
-            .SingleOrDefaultAsync(x => x.MinAge <= memberAge && x.MaxAge >= memberAge,
-                cancellationToken);
-
-        if (membershipFeeDefinition == null) throw new Exception("Membership fee definition not found.");
-
-        var membership = new MembershipFee
-        {
-            MemberId = memberId,
-            Year = DateTime.Now.Year,
-            IsPaid = false,
-            MemberhsipFeeDefinitionId = membershipFeeDefinition.Id
-        };
-
-        await dbContext.MembershipFees.AddAsync(membership, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        return years;
     }
 
     public async Task CreateMembershipsForYear(int year, CancellationToken cancellationToken = default)

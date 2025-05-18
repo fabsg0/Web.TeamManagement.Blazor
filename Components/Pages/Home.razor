@@ -3,20 +3,20 @@
 @using fabsg0.Web.TeamManagement.Blazor.Components.MembershipPopups
 @using fabsg0.Web.TeamManagement.Blazor.Models
 @using fabsg0.Web.TeamManagement.Blazor.Providers
-@rendermode InteractiveServer
 @inject MemberProvider MemberProvider
 @inject MembershipProvider MembershipProvider
 @inject ILogger<Home> Logger
+@rendermode InteractiveServer
 
 <PageTitle>Home - TeamManagement</PageTitle>
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div class="d-flex align-items-center gap-3">
-            <h2 class="mb-0">👥 Members</h2>
-            <select class="form-select form-select-sm w-auto"
+            <h2 class="mb-0 fw-bold text-primary">👥 Members</h2>
+            <select class="form-select form-select-sm w-auto shadow-sm rounded"
                     @bind="_year"
-                    @bind:after="OnYearChanged">
+                    @bind:after="FetchData">
                 @foreach (var year in _availableYears)
                 {
                     <option value="@year">@year</option>
@@ -24,81 +24,96 @@
             </select>
         </div>
 
-        <button class="btn btn-success" @onclick="@(() => _showCreateMemberPopup = true)">
-            <i class="bi bi-plus-lg"></i> Add Member
-        </button>
-
-        <button class="btn btn-primary" @onclick="@(() => _showCreateYearMembershipPopup = true)">
-            Create year-membership
-        </button>
-
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary shadow-sm" @onclick="@(() => _showCreateYearMembershipPopup = true)">
+                ➕ Create Year-Membership
+            </button>
+            <button class="btn btn-success shadow-sm" @onclick="@(() => _showCreateMemberPopup = true)">
+                ➕ Add Member
+            </button>
+        </div>
     </div>
 
     @if (_isLoading)
     {
-        <div class="text-center">
-            <div class="spinner-border" role="status">
+        <div class="d-flex justify-content-center my-5">
+            <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
     }
     else
     {
-        <div class="card shadow-sm rounded-4">
-            <div class="card-body table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-uppercase small text-muted">
                     <tr>
                         <th>#</th>
                         <th>Name</th>
                         <th>Address</th>
+                        <th>Departments</th>
                         <th>Membership</th>
                         <th>Birthdate</th>
-                        <th>Actions</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                     </thead>
                     <tbody>
                     @foreach (var member in _members)
                     {
-                        <tr @onclick="@(() => _selectedMember = member)"
-                            class="@(_selectedMember == member ? "table-active" : "")">
+                        <tr class="@(_selectedMember == member ? "table-primary" : "")"
+                            @onclick="@(() => _selectedMember = member)">
                             <td>@member.Id</td>
-                            <td>@member.FirstName @member.LastName</td>
+                            <td class="fw-medium">@member.FirstName @member.LastName</td>
                             <td>
                                 @member.Street @member.HouseNumber<br/>
-                                <small class="text-muted">@member.ZipCode @member.City</small>
+                                <span class="text-muted small">@member.ZipCode @member.City</span>
+                            </td>
+                            <td>
+                                @if (member.DepartmentMemberships != null)
+                                {
+                                    foreach (var department in member.DepartmentMemberships)
+                                    {
+                                        if (department.Department != null)
+                                        {
+                                            <span
+                                                class="badge bg-@department.Department.Color me-1">@department.Department.Name</span>
+                                        }
+                                    }
+                                }
                             </td>
                             <td>
                                 @if (member.CurrentMembershipFee is not null)
                                 {
-                                    <button type="button" @onclick="@(() => ChangePaymentStatus(member.Id))"
-                                            class="pe-auto btn btn-@(member.CurrentMembershipFee.IsPaid ? "success" : "danger")">
+                                    <button class="btn btn-sm fw-semibold text-white px-3"
+                                            style="background-color: @(member.CurrentMembershipFee.IsPaid ? "#198754" : "#dc3545")"
+                                            @onclick="@(() => ChangePaymentStatus(member.Id))">
                                         @(member.CurrentMembershipFee.IsPaid ? "Paid" : "Not Paid")
                                     </button>
                                 }
                                 else
                                 {
-                                    <button type="button" disabled="disabled" class="btn btn-secondary">Unknown</button>
+                                    <span class="badge bg-secondary">Unknown</span>
                                 }
                             </td>
                             <td>@member.BirthDate.ToString("dd.MM.yyyy")</td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-primary btn-sm" title="Edit"
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Edit"
                                             @onclick="@(() =>
                                                       {
                                                           _selectedMember = member;
                                                           _showUpdateMemberPopup = true;
                                                       })">
-                                        Update
+                                        🖊️
                                     </button>
-                                    <button class="btn btn-outline-danger btn-sm ms-1" title="Delete"
+                                    <button class="btn btn-outline-danger" title="Delete"
                                             @onclick="@(() =>
                                                       {
                                                           _selectedMember = member;
                                                           _showDeleteMemberPopup = true;
                                                       })">
-                                        Delete
+                                        🗑️
                                     </button>
                                 </div>
                             </td>
@@ -111,40 +126,24 @@
     }
 </div>
 
+@* POPUPS *@
 @if (_showCreateMemberPopup)
 {
-    <CreateMemberPopup OnClose="async () =>
-    {
-        _showCreateMemberPopup = false;
-        await FetchData();
-    }"/>
+    <CreateMemberPopup OnClose="async () => { _showCreateMemberPopup = false; await FetchData(); }"/>
 }
-
 @if (_showUpdateMemberPopup)
 {
-    <UpdateMemberPopup Member="_selectedMember" OnClose="async () =>
-    {
-        _showUpdateMemberPopup = false;
-        await FetchData();
-    }"/>
+    <UpdateMemberPopup Member="_selectedMember"
+                       OnClose="async () => { _showUpdateMemberPopup = false; await FetchData(); }"/>
 }
-
 @if (_showDeleteMemberPopup)
 {
-    <DeleteMemberPopup MemberId="_selectedMember.Id" OnClose="async () =>
-    {
-        _showDeleteMemberPopup = false;
-        await FetchData();
-    }"/>
+    <DeleteMemberPopup MemberId="_selectedMember.Id"
+                       OnClose="async () => { _showDeleteMemberPopup = false; await FetchData(); }"/>
 }
-
 @if (_showCreateYearMembershipPopup)
 {
-    <CreateYearMembershipPopup OnClose="async () =>
-    {
-        _showCreateYearMembershipPopup = false;
-        await FetchData();
-    }"/>
+    <CreateYearMembershipPopup OnClose="async () => { _showCreateYearMembershipPopup = false; await FetchData(); }"/>
 }
 
 @code {
@@ -161,12 +160,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _availableYears = Enumerable.Range(DateTime.Now.Year - 9, 10).Reverse().ToList();
-        await FetchData();
-    }
-
-    private async Task OnYearChanged()
-    {
         await FetchData();
     }
 
@@ -176,10 +169,11 @@
         try
         {
             _members = await MemberProvider.GetMembers(_year);
+            _availableYears = await MembershipProvider.GetMembershipYears();
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to fetch member data.");
+            Logger.LogError(ex, "Failed to fetch data.");
         }
         finally
         {

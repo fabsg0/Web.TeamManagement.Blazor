@@ -34,6 +34,9 @@ public partial class TeamManagementContext : DbContext
         modelBuilder.Entity<Department>(entity =>
         {
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Color)
+                .HasMaxLength(10)
+                .IsFixedLength();
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
@@ -58,6 +61,9 @@ public partial class TeamManagementContext : DbContext
             entity.Property(e => e.FirstName).HasMaxLength(50);
             entity.Property(e => e.HouseNumber).HasMaxLength(50);
             entity.Property(e => e.LastName).HasMaxLength(50);
+            entity.Property(e => e.Sex)
+                .HasMaxLength(10)
+                .IsFixedLength();
             entity.Property(e => e.Street).HasMaxLength(100);
             entity.Property(e => e.Telephone).HasMaxLength(50);
         });

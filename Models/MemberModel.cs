@@ -7,7 +7,10 @@ public class MemberModel
     public Guid Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
+    public string? Sex { get; set; }
     public DateOnly BirthDate { get; set; }
+    public string? Email { get; set; }
+    public string? Telephone { get; set; }
     public string? Street { get; set; }
     public string? HouseNumber { get; set; }
     public int? ZipCode { get; set; }

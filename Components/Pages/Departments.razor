@@ -2,104 +2,105 @@
 @using fabsg0.Web.TeamManagement.Blazor.Components.DepartmentPopups
 @using fabsg0.Web.TeamManagement.Blazor.Entities
 @using fabsg0.Web.TeamManagement.Blazor.Providers
-@rendermode InteractiveServer
 @inject DepartmentProvider DepartmentProvider
 @inject ILogger<Departments> Logger
+@rendermode InteractiveServer
 
-<h3>Departments</h3>
+<PageTitle>Departments - TeamManagement</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <button class="btn btn-success" @onclick="@(() => _showCreateDepartmentPopup = true)">
-        <i class="bi bi-plus-lg"></i> Add Department
-    </button>
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <h2 class="mb-0 fw-bold text-primary">🏢 Departments</h2>
+        <button class="btn btn-success shadow-sm" @onclick="@(() => _showCreateDepartmentPopup = true)">
+            ➕ Add Department
+        </button>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-content-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-uppercase small text-muted">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var department in _departments)
+                    {
+                        <tr>
+                            <td>@department.Id</td>
+                            <td>
+                                <span class="badge bg-@department.Color">@department.Name</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Edit"
+                                            @onclick="@(() =>
+                                                      {
+                                                          _selectedDepartment = department;
+                                                          _showUpdateDepartmentPopup = true;
+                                                      })">
+                                        🖊️
+                                    </button>
+                                    <button class="btn btn-outline-danger" title="Delete"
+                                            @onclick="@(() =>
+                                                      {
+                                                          _selectedDepartment = department;
+                                                          _showDeleteDepartmentPopup = true;
+                                                      })">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    @if (_showCreateDepartmentPopup)
+    {
+        <CreateDepartmentPopup OnClose="async () =>
+        {
+            _showCreateDepartmentPopup = false;
+            await FetchData();
+        }"/>
+    }
+
+    @if (_showUpdateDepartmentPopup)
+    {
+        <UpdateDepartmentPopup Department="_selectedDepartment" OnClose="async () =>
+        {
+            _showUpdateDepartmentPopup = false;
+            await FetchData();
+        }"/>
+    }
+
+    @if (_showDeleteDepartmentPopup)
+    {
+        <DeleteDepartmentPopup DepartmentId="_selectedDepartment.Id" OnClose="async () =>
+        {
+            _showDeleteDepartmentPopup = false;
+            await FetchData();
+        }"/>
+    }
 </div>
 
-@if (_isLoading)
-{
-    <div class="text-center">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
-}
-else
-{
-    <div class="card shadow-sm rounded-4">
-        <div class="card-body table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var department in _departments)
-                {
-                    <tr>
-                        <td>@department.Id</td>
-                        <td>@department.Name</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-outline-primary btn-sm" title="Edit"
-                                        @onclick="@(() =>
-                                                  {
-                                                      _selectedDepartment = department;
-                                                      _showUpdateDepartmentPopup = true;
-                                                  })">
-                                    Update
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm ms-1" title="Delete"
-                                        @onclick="@(() =>
-                                                  {
-                                                      _selectedDepartment = department;
-                                                      _showDeleteDepartmentPopup = true;
-                                                  })">
-                                    Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    </div>
-}
-
-@if (_showCreateDepartmentPopup)
-{
-    <CreateDepartmentPopup OnClose="@(async () =>
-                                    {
-                                        _showCreateDepartmentPopup = false;
-                                        await FetchData();
-                                    })"/>
-}
-
-@if (_showUpdateDepartmentPopup)
-{
-    <UpdateDepartmentPopup Department="_selectedDepartment"
-                           OnClose="@(async () =>
-                                    {
-                                        _showUpdateDepartmentPopup = false;
-                                        await FetchData();
-                                    })"/>
-}
-
-@if (_showDeleteDepartmentPopup)
-{
-    <DeleteDepartmentPopup DepartmentId="_selectedDepartment.Id"
-                           OnClose="@(async () =>
-                                    {
-                                        _showDeleteDepartmentPopup = false;
-                                        await FetchData();
-                                    })"/>
-}
-
-
 @code {
-
     private List<Department> _departments = [];
     private bool _isLoading;
     private Department _selectedDepartment = new();

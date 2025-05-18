@@ -5,92 +5,147 @@
 @inject DepartmentProvider DepartmentProvider
 @inject ILogger<CreateMemberPopup> Logger
 
-<Popup OnClose="OnClose" Title="Create member">
+<Popup OnClose="OnClose" Title="Create Member">
     <EditForm Model="@_member" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator/>
         <ValidationSummary/>
 
-        <div class="mb-3">
-            <label for="firstName" class="form-label">First Name</label>
-            <InputText id="firstName" class="form-control" @bind-Value="_member.FirstName"/>
-            <ValidationMessage For="@(() => _member.FirstName)"/>
-        </div>
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <button type="button" class="nav-link @(activeTab == "personal" ? "active" : "")"
+                        @onclick="@(() => SetTab("personal"))">Personal Info
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link @(activeTab == "address" ? "active" : "")"
+                        @onclick="@(() => SetTab("address"))">Address
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link @(activeTab == "departments" ? "active" : "")"
+                        @onclick="@(() => SetTab("departments"))">Departments
+                </button>
+            </li>
+        </ul>
 
-        <div class="mb-3">
-            <label for="lastName" class="form-label">Last Name</label>
-            <InputText id="lastName" class="form-control" @bind-Value="_member.LastName"/>
-            <ValidationMessage For="@(() => _member.LastName)"/>
-        </div>
+        <!-- Tab content -->
+        <div class="tab-content">
+            @if (activeTab == "personal")
+            {
+                <div class="tab-pane fade show active">
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <InputText id="firstName" class="form-control" @bind-Value="_member.FirstName"/>
+                        <ValidationMessage For="@(() => _member.FirstName)"/>
+                    </div>
 
-        <div class="mb-3">
-            <label for="birthdate" class="form-label">Birthdate</label>
-            <InputDate id="birthdate" class="form-control" @bind-Value="_member.Birthdate"/>
-            <ValidationMessage For="@(() => _member.Birthdate)"/>
-        </div>
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <InputText id="lastName" class="form-control" @bind-Value="_member.LastName"/>
+                        <ValidationMessage For="@(() => _member.LastName)"/>
+                    </div>
 
-        <div class="mb-3">
-            <label for="street" class="form-label">Street</label>
-            <InputText id="street" class="form-control" @bind-Value="_member.Street"/>
-        </div>
+                    <div class="mb-3">
+                        <label for="sex" class="form-label">Sex</label>
+                        <InputSelect id="sex" class="form-select text-capitalize" @bind-Value="_member.Sex">
+                            <option disabled selected value="">-- Select sex --</option>
+                            @foreach (var sex in _selectableSex)
+                            {
+                                <option value="@sex">@sex</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => _member.Sex)"/>
+                    </div>
 
-        <div class="mb-3">
-            <label for="houseNumber" class="form-label">House Number</label>
-            <InputText id="houseNumber" class="form-control" @bind-Value="_member.HouseNumber"/>
-        </div>
 
-        <div class="mb-3">
-            <label for="zipCode" class="form-label">Zip Code</label>
-            <InputNumber id="zipCode" class="form-control" @bind-Value="_member.ZipCode"/>
-        </div>
+                    <div class="mb-3">
+                        <label for="birthdate" class="form-label">Birthdate</label>
+                        <InputDate id="birthdate" class="form-control" @bind-Value="_member.Birthdate"/>
+                        <ValidationMessage For="@(() => _member.Birthdate)"/>
+                    </div>
 
-        <div class="mb-3">
-            <label for="city" class="form-label">City</label>
-            <InputText id="city" class="form-control" @bind-Value="_member.City"/>
-        </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <InputText id="email" class="form-control" @bind-Value="_member.Email"/>
+                    </div>
 
-        <div class="mb-3">
-            <label for="department" class="form-label">Department</label>
-            <div class="mb-3">
-                <label class="form-label">Departments</label>
-                <table class="table table-sm">
-                    <thead>
-                    <tr>
-                        <th></th>
-                        <th>Name</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var dept in _departments)
-                    {
+                    <div class="mb-3">
+                        <label for="telephone" class="form-label">Telephone</label>
+                        <InputText id="telephone" class="form-control" @bind-Value="_member.Telephone"/>
+                    </div>
+                </div>
+            }
+            else if (activeTab == "address")
+            {
+                <div class="tab-pane fade show active">
+                    <div class="mb-3">
+                        <label for="street" class="form-label">Street</label>
+                        <InputText id="street" class="form-control" @bind-Value="_member.Street"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="houseNumber" class="form-label">House Number</label>
+                        <InputText id="houseNumber" class="form-control" @bind-Value="_member.HouseNumber"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="zipCode" class="form-label">Zip Code</label>
+                        <InputNumber id="zipCode" class="form-control" @bind-Value="_member.ZipCode"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="city" class="form-label">City</label>
+                        <InputText id="city" class="form-control" @bind-Value="_member.City"/>
+                    </div>
+                </div>
+            }
+            else if (activeTab == "departments")
+            {
+                <div class="tab-pane fade show active">
+                    <label class="form-label mb-2">Departments</label>
+                    <table class="table table-sm">
+                        <thead>
                         <tr>
-                            <td>
-                                <input type="checkbox"
-                                       checked="@_selectedDepartmentIds.Contains(dept.Id)"
-                                       @onchange="e => ToggleDepartment(dept.Id, e.Value)"/>
-
-                            </td>
-                            <td>@dept.Name</td>
+                            <th></th>
+                            <th>Name</th>
                         </tr>
-                    }
-                    </tbody>
-                </table>
-            </div>
-            <ValidationMessage For="@(() => _selectedDepartmentIds)"/>
+                        </thead>
+                        <tbody>
+                        @foreach (var dept in _departments)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox"
+                                           checked="@_selectedDepartmentIds.Contains(dept.Id)"
+                                           @onchange="e => ToggleDepartment(dept.Id, e.Value)"/>
+                                </td>
+                                <td>@dept.Name</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                    <ValidationMessage For="@(() => _selectedDepartmentIds)"/>
+                </div>
+            }
         </div>
 
-
-        <button type="submit" class="btn btn-success">Save</button>
-        <button type="button" class="btn btn-danger" @onclick="OnClose">Cancel</button>
+        <!-- Buttons -->
+        <div class="mt-3 d-flex justify-content-end gap-2">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-danger" @onclick="OnClose">Cancel</button>
+        </div>
     </EditForm>
 </Popup>
 
 @code {
-
     [Parameter] public EventCallback OnClose { get; set; }
 
-    private List<Department> _departments = [];
-    private readonly List<Guid> _selectedDepartmentIds = new();
     private readonly Member _member = new();
+    private List<Department> _departments = [];
+    private readonly List<Guid> _selectedDepartmentIds = [];
+    private readonly List<string> _selectableSex = ["man", "woman"];
+    private string activeTab = "personal";
 
     protected override async Task OnInitializedAsync()
     {
@@ -102,6 +157,11 @@
         {
             Logger.LogError(ex, "Failed to fetch departments.");
         }
+    }
+
+    private void SetTab(string tabKey)
+    {
+        activeTab = tabKey;
     }
 
     private void ToggleDepartment(Guid departmentId, object? isChecked)
@@ -118,7 +178,6 @@
             _selectedDepartmentIds.Remove(departmentId);
         }
     }
-
 
     private async Task HandleValidSubmit()
     {

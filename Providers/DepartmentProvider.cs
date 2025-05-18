@@ -20,6 +20,7 @@ public class DepartmentProvider(TeamManagementContext dbContext)
         if (departmentToUpdate == null) throw new Exception("Department not found.");
 
         departmentToUpdate.Name = department.Name;
+        departmentToUpdate.Color = department.Color;
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
