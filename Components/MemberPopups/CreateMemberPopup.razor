@@ -2,50 +2,82 @@
 @using fabsg0.Web.TeamManagement.Blazor.Entities
 @using fabsg0.Web.TeamManagement.Blazor.Providers
 @inject MemberProvider MemberProvider
+@inject DepartmentProvider DepartmentProvider
 @inject ILogger<CreateMemberPopup> Logger
 
 <Popup OnClose="OnClose" Title="Create member">
     <EditForm Model="@_member" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
 
         <div class="mb-3">
             <label for="firstName" class="form-label">First Name</label>
-            <InputText id="firstName" class="form-control" @bind-Value="_member.FirstName" />
-            <ValidationMessage For="@(() => _member.FirstName)" />
+            <InputText id="firstName" class="form-control" @bind-Value="_member.FirstName"/>
+            <ValidationMessage For="@(() => _member.FirstName)"/>
         </div>
 
         <div class="mb-3">
             <label for="lastName" class="form-label">Last Name</label>
-            <InputText id="lastName" class="form-control" @bind-Value="_member.LastName" />
-            <ValidationMessage For="@(() => _member.LastName)" />
+            <InputText id="lastName" class="form-control" @bind-Value="_member.LastName"/>
+            <ValidationMessage For="@(() => _member.LastName)"/>
         </div>
 
         <div class="mb-3">
             <label for="birthdate" class="form-label">Birthdate</label>
-            <InputDate id="birthdate" class="form-control" @bind-Value="_member.Birthdate" />
-            <ValidationMessage For="@(() => _member.Birthdate)" />
+            <InputDate id="birthdate" class="form-control" @bind-Value="_member.Birthdate"/>
+            <ValidationMessage For="@(() => _member.Birthdate)"/>
         </div>
 
         <div class="mb-3">
             <label for="street" class="form-label">Street</label>
-            <InputText id="street" class="form-control" @bind-Value="_member.Street" />
+            <InputText id="street" class="form-control" @bind-Value="_member.Street"/>
         </div>
 
         <div class="mb-3">
             <label for="houseNumber" class="form-label">House Number</label>
-            <InputText id="houseNumber" class="form-control" @bind-Value="_member.HouseNumber" />
+            <InputText id="houseNumber" class="form-control" @bind-Value="_member.HouseNumber"/>
         </div>
 
         <div class="mb-3">
             <label for="zipCode" class="form-label">Zip Code</label>
-            <InputNumber id="zipCode" class="form-control" @bind-Value="_member.ZipCode" />
+            <InputNumber id="zipCode" class="form-control" @bind-Value="_member.ZipCode"/>
         </div>
 
         <div class="mb-3">
             <label for="city" class="form-label">City</label>
-            <InputText id="city" class="form-control" @bind-Value="_member.City" />
+            <InputText id="city" class="form-control" @bind-Value="_member.City"/>
         </div>
+
+        <div class="mb-3">
+            <label for="department" class="form-label">Department</label>
+            <div class="mb-3">
+                <label class="form-label">Departments</label>
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var dept in _departments)
+                    {
+                        <tr>
+                            <td>
+                                <input type="checkbox"
+                                       checked="@_selectedDepartmentIds.Contains(dept.Id)"
+                                       @onchange="e => ToggleDepartment(dept.Id, e.Value)"/>
+
+                            </td>
+                            <td>@dept.Name</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <ValidationMessage For="@(() => _selectedDepartmentIds)"/>
+        </div>
+
 
         <button type="submit" class="btn btn-success">Save</button>
         <button type="button" class="btn btn-danger" @onclick="OnClose">Cancel</button>
@@ -56,18 +88,54 @@
 
     [Parameter] public EventCallback OnClose { get; set; }
 
-    private Member _member = new();
+    private List<Department> _departments = [];
+    private readonly List<Guid> _selectedDepartmentIds = new();
+    private readonly Member _member = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _departments = await DepartmentProvider.GetDepartments();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to fetch departments.");
+        }
+    }
+
+    private void ToggleDepartment(Guid departmentId, object? isChecked)
+    {
+        var isSelected = isChecked is bool and true;
+
+        if (isSelected)
+        {
+            if (!_selectedDepartmentIds.Contains(departmentId))
+                _selectedDepartmentIds.Add(departmentId);
+        }
+        else
+        {
+            _selectedDepartmentIds.Remove(departmentId);
+        }
+    }
+
 
     private async Task HandleValidSubmit()
     {
         try
         {
-            await MemberProvider.CreateMember(_member);
+            var createdMember = await MemberProvider.CreateMember(_member);
+
+            foreach (var departmentId in _selectedDepartmentIds)
+            {
+                await DepartmentProvider.CreateDepartmentMembership(createdMember.Id, departmentId);
+            }
+
             await OnClose.InvokeAsync();
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to create member.");
+            Logger.LogError(ex, "Failed to create member and assign departments.");
         }
     }
 

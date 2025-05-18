@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using fabsg0.Web.TeamManagement.Blazor.Entities;
 using Microsoft.EntityFrameworkCore;
-using fabsg0.Web.TeamManagement.Blazor.Entities;
 
 namespace fabsg0.Web.TeamManagement.Blazor.Database;
 
@@ -27,8 +25,9 @@ public partial class TeamManagementContext : DbContext
     public virtual DbSet<MembershipFeeDefinition> MembershipFeeDefinitions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=TeamManagement;Trusted_Connection=True;Encrypt=False");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: //go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer(
+            "Data Source=localhost;Initial Catalog=TeamManagement;Trusted_Connection=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

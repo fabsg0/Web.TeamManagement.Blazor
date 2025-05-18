@@ -1,6 +1,8 @@
 # Web.TeamManagement.Blazor
 
-**Web.TeamManagement.Blazor** is a Blazor WebAssembly application designed to help sports clubs manage their members efficiently. This tool enables administrators to add, organize, and manage club members, assign them to specific sections or teams, and track membership fees.
+**Web.TeamManagement.Blazor** is a Blazor WebAssembly application designed to help sports clubs manage their members
+efficiently. This tool enables administrators to add, organize, and manage club members, assign them to specific
+sections or teams, and track membership fees.
 
 ## Features
 
@@ -19,8 +21,8 @@
 ## Technologies Used
 
 - **Blazor** – for building the front-end
-- **.NET Core / ASP.NET** – for backend and API services  
-- **Entity Framework Core** – for data access  
+- **.NET Core / ASP.NET** – for backend and API services
+- **Entity Framework Core** – for data access
 - **SQL Server** – as the database provider
 
 ## Getting Started
@@ -40,6 +42,7 @@ To run the project locally:
    dotnet run```
 
 ## License
+
 This project is licensed under the MIT License.
 
 

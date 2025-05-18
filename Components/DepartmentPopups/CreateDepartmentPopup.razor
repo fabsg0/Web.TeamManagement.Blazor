@@ -6,13 +6,13 @@
 
 <Popup OnClose="OnClose" Title="Create department">
     <EditForm Model="@_department" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
 
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
-            <InputText id="name" class="form-control" @bind-Value="_department.Name" />
-            <ValidationMessage For="@(() => _department.Name)" />
+            <InputText id="name" class="form-control" @bind-Value="_department.Name"/>
+            <ValidationMessage For="@(() => _department.Name)"/>
         </div>
 
         <button type="submit" class="btn btn-success">Save</button>
@@ -24,7 +24,7 @@
 
     [Parameter] public EventCallback OnClose { get; set; }
 
-    private Department _department = new();
+    private readonly Department _department = new();
 
     private async Task HandleValidSubmit()
     {

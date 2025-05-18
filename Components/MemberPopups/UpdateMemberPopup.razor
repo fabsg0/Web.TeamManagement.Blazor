@@ -1,51 +1,79 @@
 ﻿@using fabsg0.Web.TeamManagement.Blazor.Components.CustomComponents
+@using fabsg0.Web.TeamManagement.Blazor.Entities
 @using fabsg0.Web.TeamManagement.Blazor.Models
 @using fabsg0.Web.TeamManagement.Blazor.Providers
 @inject MemberProvider MemberProvider
+@inject DepartmentProvider DepartmentProvider
 @inject ILogger<UpdateMemberPopup> Logger
 
 <Popup OnClose="OnClose" Title="Update member">
     <EditForm Model="@Member" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
 
         <div class="mb-3">
             <label for="firstName" class="form-label">First Name</label>
-            <InputText id="firstName" class="form-control" @bind-Value="Member.FirstName" />
-            <ValidationMessage For="@(() => Member.FirstName)" />
+            <InputText id="firstName" class="form-control" @bind-Value="Member.FirstName"/>
+            <ValidationMessage For="@(() => Member.FirstName)"/>
         </div>
 
         <div class="mb-3">
             <label for="lastName" class="form-label">Last Name</label>
-            <InputText id="lastName" class="form-control" @bind-Value="Member.LastName" />
-            <ValidationMessage For="@(() => Member.LastName)" />
+            <InputText id="lastName" class="form-control" @bind-Value="Member.LastName"/>
+            <ValidationMessage For="@(() => Member.LastName)"/>
         </div>
 
         <div class="mb-3">
             <label for="birthdate" class="form-label">Birthdate</label>
-            <InputDate id="birthdate" class="form-control" @bind-Value="Member.BirthDate" />
-            <ValidationMessage For="@(() => Member.BirthDate)" />
+            <InputDate id="birthdate" class="form-control" @bind-Value="Member.BirthDate"/>
+            <ValidationMessage For="@(() => Member.BirthDate)"/>
         </div>
 
         <div class="mb-3">
             <label for="street" class="form-label">Street</label>
-            <InputText id="street" class="form-control" @bind-Value="Member.Street" />
+            <InputText id="street" class="form-control" @bind-Value="Member.Street"/>
         </div>
 
         <div class="mb-3">
             <label for="houseNumber" class="form-label">House Number</label>
-            <InputText id="houseNumber" class="form-control" @bind-Value="Member.HouseNumber" />
+            <InputText id="houseNumber" class="form-control" @bind-Value="Member.HouseNumber"/>
         </div>
 
         <div class="mb-3">
             <label for="zipCode" class="form-label">Zip Code</label>
-            <InputNumber id="zipCode" class="form-control" @bind-Value="Member.ZipCode" />
+            <InputNumber id="zipCode" class="form-control" @bind-Value="Member.ZipCode"/>
         </div>
 
         <div class="mb-3">
             <label for="city" class="form-label">City</label>
-            <InputText id="city" class="form-control" @bind-Value="Member.City" />
+            <InputText id="city" class="form-control" @bind-Value="Member.City"/>
         </div>
+
+        <div class="mb-3">
+            <label class="form-label">Departments</label>
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var dept in _departments)
+                {
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   checked="@_selectedDepartmentIds.Contains(dept.Id)"
+                                   @onchange="e => ToggleDepartment(dept.Id, e.Value)"/>
+                        </td>
+                        <td>@dept.Name</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
 
         <button type="submit" class="btn btn-success">Save</button>
         <button type="button" class="btn btn-danger" @onclick="OnClose">Cancel</button>
@@ -57,17 +85,50 @@
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public required MemberModel Member { get; set; }
 
+    private List<Department> _departments = [];
+    private List<Guid> _selectedDepartmentIds = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _departments = await DepartmentProvider.GetDepartments();
+            _selectedDepartmentIds = await DepartmentProvider.GetDepartmentIdsForMember(Member.Id);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load departments.");
+        }
+    }
+
+    private void ToggleDepartment(Guid departmentId, object? isChecked)
+    {
+        var isSelected = isChecked is bool value && value;
+
+        if (isSelected)
+        {
+            if (!_selectedDepartmentIds.Contains(departmentId))
+                _selectedDepartmentIds.Add(departmentId);
+        }
+        else
+        {
+            _selectedDepartmentIds.Remove(departmentId);
+        }
+    }
+
     private async Task HandleValidSubmit()
     {
         try
         {
             await MemberProvider.UpdateMember(Member);
+            await DepartmentProvider.SetDepartmentMemberships(Member.Id, _selectedDepartmentIds);
             await OnClose.InvokeAsync();
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to update member.");
+            Logger.LogError(ex, "Failed to update member and departments.");
         }
     }
+
 
 }

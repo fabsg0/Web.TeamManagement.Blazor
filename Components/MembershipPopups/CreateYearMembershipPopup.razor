@@ -15,7 +15,8 @@
                placeholder="e.g. 2025"/>
     </div>
 
-    <button class="btn btn-primary" @onclick="CreateYearMembership">Create</button>
+    <button class="btn btn-success" @onclick="CreateYearMembership">Create</button>
+    <button class="btn btn-secondary" @onclick="OnClose">Cancel</button>
 </Popup>
 
 @code {
@@ -28,6 +29,7 @@
         try
         {
             await MembershipProvider.CreateMembershipsForYear(_selectedYear);
+            await OnClose.InvokeAsync();
         }
         catch (Exception ex)
         {

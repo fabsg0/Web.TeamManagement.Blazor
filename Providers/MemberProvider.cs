@@ -32,15 +32,18 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
         return members;
     }
 
-    public async Task CreateMember(Member member, CancellationToken cancellationToken = default)
+    public async Task<Member> CreateMember(Member member, CancellationToken cancellationToken = default)
     {
         var memberId = Guid.NewGuid();
         member.Id = memberId;
         member.UpdatedAt = DateTimeOffset.Now;
-        
+
         await dbContext.Members.AddAsync(member, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        await membershipProvider.CreateMembershipForYear(memberId, cancellationToken); // Creates membership entries for all years
+        await membershipProvider.CreateMembershipForYear(memberId,
+            cancellationToken); // Creates membership entries for all years
+
+        return member;
     }
 
     public async Task UpdateMember(MemberModel member, CancellationToken cancellationToken = default)
@@ -70,10 +73,10 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
             .SingleOrDefaultAsync(x => x.Id == memberId, cancellationToken);
 
         if (member == null) throw new Exception("Member not found.");
-        
+
         if (member.MembershipFees.Count != 0) dbContext.MembershipFees.RemoveRange(member.MembershipFees);
         if (member.DepartmentMembers.Count != 0) dbContext.DepartmentMembers.RemoveRange(member.DepartmentMembers);
-        
+
         dbContext.Members.Remove(member);
         await dbContext.SaveChangesAsync(cancellationToken);
     }

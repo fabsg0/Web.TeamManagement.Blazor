@@ -71,16 +71,16 @@ public class MembershipProvider(TeamManagementContext dbContext)
         var member = await dbContext.Members
             .Include(x => x.MembershipFees)
             .SingleOrDefaultAsync(x => x.Id == memberId, cancellationToken);
-        
+
         if (member == null) throw new Exception("Member not found.");
-        
+
         var feeDefinitions = await dbContext.MembershipFeeDefinitions.ToListAsync(cancellationToken);
         var membershipYears = await dbContext.MembershipFees.Select(x => x.Year).ToListAsync(cancellationToken);
 
         foreach (var year in membershipYears)
         {
             if (member.MembershipFees.Any(x => x.Year == year)) continue;
-            
+
             var age = year - member.Birthdate.Year;
             var feeDefinition = feeDefinitions.SingleOrDefault(x => x.MinAge <= age && x.MaxAge >= age);
 
@@ -100,7 +100,6 @@ public class MembershipProvider(TeamManagementContext dbContext)
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
-        
     }
 
 
@@ -113,7 +112,7 @@ public class MembershipProvider(TeamManagementContext dbContext)
 
         memberShip.IsPaid = !memberShip.IsPaid;
         memberShip.PaidAt = memberShip.IsPaid ? DateTimeOffset.Now : DateTimeOffset.MinValue;
-        
+
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

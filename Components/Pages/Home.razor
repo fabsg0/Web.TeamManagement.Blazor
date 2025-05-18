@@ -1,8 +1,8 @@
 ﻿@page "/"
-@using fabsg0.Web.TeamManagement.Blazor.Models
-@using fabsg0.Web.TeamManagement.Blazor.Providers
 @using fabsg0.Web.TeamManagement.Blazor.Components.MemberPopups
 @using fabsg0.Web.TeamManagement.Blazor.Components.MembershipPopups
+@using fabsg0.Web.TeamManagement.Blazor.Models
+@using fabsg0.Web.TeamManagement.Blazor.Providers
 @rendermode InteractiveServer
 @inject MemberProvider MemberProvider
 @inject MembershipProvider MembershipProvider
@@ -60,7 +60,8 @@
                     <tbody>
                     @foreach (var member in _members)
                     {
-                        <tr>
+                        <tr @onclick="@(() => _selectedMember = member)"
+                            class="@(_selectedMember == member ? "table-active" : "")">
                             <td>@member.Id</td>
                             <td>@member.FirstName @member.LastName</td>
                             <td>

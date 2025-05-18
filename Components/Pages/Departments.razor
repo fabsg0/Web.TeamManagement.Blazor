@@ -1,7 +1,7 @@
 @page "/Departments"
+@using fabsg0.Web.TeamManagement.Blazor.Components.DepartmentPopups
 @using fabsg0.Web.TeamManagement.Blazor.Entities
 @using fabsg0.Web.TeamManagement.Blazor.Providers
-@using fabsg0.Web.TeamManagement.Blazor.Components.DepartmentPopups
 @rendermode InteractiveServer
 @inject DepartmentProvider DepartmentProvider
 @inject ILogger<Departments> Logger
@@ -43,11 +43,19 @@ else
                         <td>
                             <div class="btn-group">
                                 <button class="btn btn-outline-primary btn-sm" title="Edit"
-                                        @onclick="@(() => { _selectedDepartment = department; _showUpdateDepartmentPopup = true; })">
+                                        @onclick="@(() =>
+                                                  {
+                                                      _selectedDepartment = department;
+                                                      _showUpdateDepartmentPopup = true;
+                                                  })">
                                     Update
                                 </button>
                                 <button class="btn btn-outline-danger btn-sm ms-1" title="Delete"
-                                        @onclick="@(() => { _selectedDepartment = department; _showDeleteDepartmentPopup = true; })">
+                                        @onclick="@(() =>
+                                                  {
+                                                      _selectedDepartment = department;
+                                                      _showDeleteDepartmentPopup = true;
+                                                  })">
                                     Delete
                                 </button>
                             </div>
@@ -62,19 +70,31 @@ else
 
 @if (_showCreateDepartmentPopup)
 {
-    <CreateDepartmentPopup OnClose="@(async () => { _showCreateDepartmentPopup = false; await FetchData(); })"/>
+    <CreateDepartmentPopup OnClose="@(async () =>
+                                    {
+                                        _showCreateDepartmentPopup = false;
+                                        await FetchData();
+                                    })"/>
 }
 
 @if (_showUpdateDepartmentPopup)
 {
     <UpdateDepartmentPopup Department="_selectedDepartment"
-                           OnClose="@(async () => { _showUpdateDepartmentPopup = false; await FetchData(); })"/>
+                           OnClose="@(async () =>
+                                    {
+                                        _showUpdateDepartmentPopup = false;
+                                        await FetchData();
+                                    })"/>
 }
 
 @if (_showDeleteDepartmentPopup)
 {
     <DeleteDepartmentPopup DepartmentId="_selectedDepartment.Id"
-                           OnClose="@(async () => { _showDeleteDepartmentPopup = false; await FetchData(); })"/>
+                           OnClose="@(async () =>
+                                    {
+                                        _showDeleteDepartmentPopup = false;
+                                        await FetchData();
+                                    })"/>
 }
 
 
