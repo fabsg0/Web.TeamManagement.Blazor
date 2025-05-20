@@ -29,11 +29,13 @@ jobs:
         source: publish/
         target: /var/www/teammanagement/
 
-    - name: Restart service on Hetzner
+    - name: Restart and set env vars
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HETZNER_HOST }}
         username: ${{ secrets.HETZNER_USER }}
         key: ${{ secrets.HETZNER_SSH_KEY }}
         script: |
+          export ConnectionStrings__DefaultConnection='${{ secrets.SQL_CONNECTION_STRING }}'
           sudo systemctl restart myapp
+
