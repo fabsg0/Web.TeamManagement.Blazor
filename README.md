@@ -23,7 +23,7 @@ sections or teams, and track membership fees.
 - **Blazor** – for building the front-end
 - **.NET Core / ASP.NET** – for backend and API services
 - **Entity Framework Core** – for data access
-- **SQL Server** – as the database provider
+- **PostgreSQL Server** – as the database provider
 
 ## Getting Started
 
