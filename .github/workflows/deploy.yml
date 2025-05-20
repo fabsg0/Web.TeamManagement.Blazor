@@ -1,4 +1,4 @@
-name: Deploy TeamManagement App to Ubutnu server
+name: Deploy TeamManagement App to Ubuntu server
 
 on:
   push:
@@ -29,13 +29,14 @@ jobs:
         source: publish/
         target: /var/www/teammanagement/
 
-    - name: Restart and set env vars
+    - name: Inject connection string and restart service
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HETZNER_HOST }}
         username: ${{ secrets.HETZNER_USER }}
         key: ${{ secrets.HETZNER_SSH_KEY }}
         script: |
-          export ConnectionStrings__DefaultConnection='${{ secrets.SQL_CONNECTION_STRING }}'
+          sudo sed -i '/^Environment=ConnectionStrings__/d' /etc/systemd/system/teamManagement.service
+          echo "Environment=ConnectionStrings__DefaultConnection=${{ secrets.SQL_CONNECTION_STRING }}" | sudo tee -a /etc/systemd/system/teamManagement.service
+          sudo systemctl daemon-reexec
           sudo systemctl restart teamManagement
-
