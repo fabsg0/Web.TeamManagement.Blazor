@@ -1,4 +1,4 @@
-name: Deploy TeamManagement App to Ubuntu server
+name: Deploy App to Ubuntu server
 
 on:
   push:
