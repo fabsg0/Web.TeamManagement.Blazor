@@ -39,11 +39,17 @@ jobs:
         username: ${{ secrets.HETZNER_USER }}
         key: ${{ secrets.HETZNER_SSH_KEY }}
         script: |
+          # Remove old env lines
           sudo sed -i '/^Environment=ConnectionStrings__/d' /etc/systemd/system/teamManagement.service
-          echo "Environment=ConnectionStrings__DefaultConnection=${{ secrets.SQL_CONNECTION_STRING }}" | sudo tee -a /etc/systemd/system/teamManagement.service
-          sudo systemctl daemon-reexec
-          sudo systemctl restart teamManagement
 
+          # Inject into the [Service] section (after line matching [Service])
+          sudo sed -i '/^\[Service\]/a Environment=ConnectionStrings__DefaultConnection=${{ secrets.SQL_CONNECTION_STRING }}' /etc/systemd/system/teamManagement.service
+          
+          # Reload and restart
+          sudo systemctl daemon-reexec
+          sudo systemctl daemon-reload
+          sudo systemctl restart teamManagement
+          
     - name: Verify deployment via health check
       run: |
         echo "Waiting 10 seconds for app to become available..."
