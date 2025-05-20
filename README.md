@@ -1,4 +1,7 @@
 # Web.TeamManagement.Blazor
+[![.NET](https://github.com/fabsg0/Web.TeamManagement.Blazor/actions/workflows/dotnet.yml/badge.svg)](https://github.com/fabsg0/Web.TeamManagement.Blazor/actions/workflows/dotnet.yml) 
+[![Deploy App to Ubuntu server](https://github.com/fabsg0/Web.TeamManagement.Blazor/actions/workflows/deploy.yml/badge.svg)](https://github.com/fabsg0/Web.TeamManagement.Blazor/actions/workflows/deploy.yml)
+
 
 **Web.TeamManagement.Blazor** is a Blazor WebAssembly application designed to help sports clubs manage their members
 efficiently. This tool enables administrators to add, organize, and manage club members, assign them to specific
