@@ -37,5 +37,5 @@ jobs:
         key: ${{ secrets.HETZNER_SSH_KEY }}
         script: |
           export ConnectionStrings__DefaultConnection='${{ secrets.SQL_CONNECTION_STRING }}'
-          sudo systemctl restart myapp
+          sudo systemctl restart teammanagement
 
