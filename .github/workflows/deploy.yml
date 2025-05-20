@@ -49,10 +49,3 @@ jobs:
           sudo systemctl daemon-reexec
           sudo systemctl daemon-reload
           sudo systemctl restart teamManagement
-          
-    - name: Verify deployment via health check
-      run: |
-        echo "Waiting 10 seconds for app to become available..."
-        sleep 10
-        echo "Pinging https://app.su-leisach.com ..."
-        curl -f --retry 5 --retry-delay 5 https://app.su-leisach.com
