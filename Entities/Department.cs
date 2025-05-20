@@ -1,6 +1,9 @@
-﻿namespace fabsg0.Web.TeamManagement.Blazor.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class Department
+namespace fabsg0.Web.TeamManagement.Blazor.Entities;
+
+public partial class Department
 {
     public Guid Id { get; set; }
 

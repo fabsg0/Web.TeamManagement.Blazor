@@ -41,7 +41,7 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
     {
         var memberId = Guid.NewGuid();
         member.Id = memberId;
-        member.UpdatedAt = DateTimeOffset.Now;
+        member.UpdatedAt = DateTime.UtcNow;
 
         await dbContext.Members.AddAsync(member, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -68,7 +68,7 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
         memberToUpdate.HouseNumber = member.HouseNumber;
         memberToUpdate.ZipCode = member.ZipCode;
         memberToUpdate.City = member.City;
-        memberToUpdate.UpdatedAt = DateTimeOffset.UtcNow;
+        memberToUpdate.UpdatedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

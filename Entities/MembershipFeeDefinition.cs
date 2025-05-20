@@ -1,6 +1,9 @@
-﻿namespace fabsg0.Web.TeamManagement.Blazor.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class MembershipFeeDefinition
+namespace fabsg0.Web.TeamManagement.Blazor.Entities;
+
+public partial class MembershipFeeDefinition
 {
     public Guid Id { get; set; }
 

@@ -1,19 +1,12 @@
-﻿using fabsg0.Web.TeamManagement.Blazor.Entities;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using fabsg0.Web.TeamManagement.Blazor.Entities;
 
 namespace fabsg0.Web.TeamManagement.Blazor.Database;
 
-public partial class TeamManagementContext : DbContext
+public partial class TeamManagementContext(DbContextOptions<TeamManagementContext> options) : DbContext(options)
 {
-    public TeamManagementContext()
-    {
-    }
-
-    public TeamManagementContext(DbContextOptions<TeamManagementContext> options)
-        : base(options)
-    {
-    }
-
     public virtual DbSet<Department> Departments { get; set; }
 
     public virtual DbSet<DepartmentMember> DepartmentMembers { get; set; }
@@ -24,16 +17,13 @@ public partial class TeamManagementContext : DbContext
 
     public virtual DbSet<MembershipFeeDefinition> MembershipFeeDefinitions { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: //go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer(
-            "Data Source=localhost;Initial Catalog=TeamManagement;Trusted_Connection=True;Encrypt=False");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension("pgcrypto");
+
         modelBuilder.Entity<Department>(entity =>
         {
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.Color)
                 .HasMaxLength(10)
                 .IsFixedLength();
@@ -42,7 +32,11 @@ public partial class TeamManagementContext : DbContext
 
         modelBuilder.Entity<DepartmentMember>(entity =>
         {
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.HasIndex(e => e.DepartmentId, "IX_DepartmentMembers_DepartmentId");
+
+            entity.HasIndex(e => e.MemberId, "IX_DepartmentMembers_MemberId");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Department).WithMany(p => p.DepartmentMembers)
                 .HasForeignKey(d => d.DepartmentId)
@@ -55,7 +49,7 @@ public partial class TeamManagementContext : DbContext
 
         modelBuilder.Entity<Member>(entity =>
         {
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.City).HasMaxLength(50);
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.FirstName).HasMaxLength(50);
@@ -72,7 +66,11 @@ public partial class TeamManagementContext : DbContext
         {
             entity.ToTable("MembershipFee");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.HasIndex(e => e.MemberId, "IX_MembershipFee_MemberId");
+
+            entity.HasIndex(e => e.MemberhsipFeeDefinitionId, "IX_MembershipFee_MemberhsipFeeDefinitionId");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Member).WithMany(p => p.MembershipFees)
                 .HasForeignKey(d => d.MemberId)
@@ -87,7 +85,7 @@ public partial class TeamManagementContext : DbContext
         {
             entity.ToTable("MembershipFeeDefinition");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 

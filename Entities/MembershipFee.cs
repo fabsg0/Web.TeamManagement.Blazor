@@ -1,6 +1,9 @@
-﻿namespace fabsg0.Web.TeamManagement.Blazor.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class MembershipFee
+namespace fabsg0.Web.TeamManagement.Blazor.Entities;
+
+public partial class MembershipFee
 {
     public Guid Id { get; set; }
 
@@ -12,7 +15,7 @@ public class MembershipFee
 
     public int Year { get; set; }
 
-    public DateTimeOffset PaidAt { get; set; }
+    public DateTime PaidAt { get; set; }
 
     public virtual Member? Member { get; set; }
 

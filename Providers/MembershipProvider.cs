@@ -40,7 +40,7 @@ public class MembershipProvider(TeamManagementContext dbContext)
                 Year = year,
                 IsPaid = false,
                 MemberhsipFeeDefinitionId = feeDefinition.Id,
-                PaidAt = DateTimeOffset.MinValue
+                PaidAt = DateTime.MinValue
             };
 
             await dbContext.MembershipFees.AddAsync(membership, cancellationToken);
@@ -76,7 +76,7 @@ public class MembershipProvider(TeamManagementContext dbContext)
                 Year = year,
                 IsPaid = false,
                 MemberhsipFeeDefinitionId = feeDefinition.Id,
-                PaidAt = DateTimeOffset.MinValue
+                PaidAt = DateTime.MinValue
             };
 
             await dbContext.MembershipFees.AddAsync(membership, cancellationToken);
@@ -94,7 +94,7 @@ public class MembershipProvider(TeamManagementContext dbContext)
         if (memberShip == null) throw new Exception("Membership fee not found.");
 
         memberShip.IsPaid = !memberShip.IsPaid;
-        memberShip.PaidAt = memberShip.IsPaid ? DateTimeOffset.Now : DateTimeOffset.MinValue;
+        memberShip.PaidAt = memberShip.IsPaid ? DateTime.UtcNow : DateTime.MinValue;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

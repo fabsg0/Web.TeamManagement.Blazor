@@ -1,6 +1,9 @@
-﻿namespace fabsg0.Web.TeamManagement.Blazor.Entities;
+﻿using System;
+using System.Collections.Generic;
 
-public class Member
+namespace fabsg0.Web.TeamManagement.Blazor.Entities;
+
+public partial class Member
 {
     public Guid Id { get; set; }
 
@@ -18,13 +21,13 @@ public class Member
 
     public string? City { get; set; }
 
-    public DateTimeOffset? UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public string? Email { get; set; }
 
     public string? Telephone { get; set; }
 
-    public string? Sex { get; set; } = null!;
+    public string? Sex { get; set; }
 
     public virtual ICollection<DepartmentMember> DepartmentMembers { get; set; } = new List<DepartmentMember>();
 

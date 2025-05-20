@@ -155,7 +155,7 @@
     private bool _showCreateYearMembershipPopup;
     private MemberModel _selectedMember = new();
 
-    private int _year = DateTime.Now.Year;
+    private int _year = DateTime.UtcNow.Year;
     private List<int> _availableYears = [];
 
     protected override async Task OnInitializedAsync()
