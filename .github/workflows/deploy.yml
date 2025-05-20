@@ -7,6 +7,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://app.su-leisach.com
 
     steps:
     - name: Checkout code
@@ -39,7 +42,6 @@ jobs:
           sudo sed -i '/^Environment=ConnectionStrings__/d' /etc/systemd/system/teamManagement.service
           echo "Environment=ConnectionStrings__DefaultConnection=${{ secrets.SQL_CONNECTION_STRING }}" | sudo tee -a /etc/systemd/system/teamManagement.service
           sudo systemctl daemon-reexec
-          sudo systemctl daemon-reload
           sudo systemctl restart teamManagement
 
     - name: Verify deployment via health check
