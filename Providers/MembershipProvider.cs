@@ -65,10 +65,12 @@ public class MembershipProvider(TeamManagementContext dbContext)
             if (member.MembershipFees.Any(x => x.Year == year)) continue;
 
             var age = year - member.Birthdate.Year;
-            var feeDefinition = feeDefinitions.SingleOrDefault(x => x.MinAge <= age && x.MaxAge >= age);
+            if (age <= 0) continue;
+            
+            var feeDefinition = feeDefinitions.SingleOrDefault(x => x.MinAge <= age && x.MaxAge > age);
 
-            if (feeDefinition == null)
-                throw new Exception($"Membership fee definition not found for member {member.Id} with age {age}.");
+            if (feeDefinition == null) continue;
+                // throw new Exception($"Membership fee definition not found for member {member.Id} with age {age}.");
 
             var membership = new MembershipFee
             {

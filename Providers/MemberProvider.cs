@@ -88,4 +88,21 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
         dbContext.Members.Remove(member);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task DeleteAllMembers(CancellationToken cancellationToken = default)
+    {
+        var members = await dbContext.Members
+            .Include(x => x.MembershipFees)
+            .Include(x => x.DepartmentMembers)
+            .ToListAsync(cancellationToken);
+
+        foreach (var member in members)
+        {
+            if (member.MembershipFees.Count != 0) dbContext.MembershipFees.RemoveRange(member.MembershipFees);
+            if (member.DepartmentMembers.Count != 0) dbContext.DepartmentMembers.RemoveRange(member.DepartmentMembers);
+        }
+        
+        dbContext.Members.RemoveRange(members);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

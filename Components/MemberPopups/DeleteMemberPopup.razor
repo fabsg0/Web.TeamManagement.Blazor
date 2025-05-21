@@ -7,6 +7,7 @@
 
     <h3>Do you really want to delete this member?</h3>
 
+    <button type="button" class="btn btn-warning" @onclick="DeleteAllMembers">Delete ALL</button>
     <button type="submit" class="btn btn-danger" @onclick="DeleteMember">Delete</button>
     <button type="button" class="btn btn-secondary" @onclick="OnClose">Cancel</button>
 </Popup>
@@ -26,6 +27,19 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to delete member.");
+        }
+    }
+
+    private async Task DeleteAllMembers()
+    {
+        try
+        {
+            await MemberProvider.DeleteAllMembers();
+            await OnClose.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to delete all members.");
         }
     }
 
