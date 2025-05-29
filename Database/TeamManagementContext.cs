@@ -20,6 +20,7 @@ public partial class TeamManagementContext(DbContextOptions<TeamManagementContex
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("pgcrypto");
+        modelBuilder.HasPostgresEnum<Sex>();
 
         modelBuilder.Entity<Department>(entity =>
         {
@@ -56,8 +57,8 @@ public partial class TeamManagementContext(DbContextOptions<TeamManagementContex
             entity.Property(e => e.HouseNumber).HasMaxLength(50);
             entity.Property(e => e.LastName).HasMaxLength(50);
             entity.Property(e => e.Sex)
-                .HasMaxLength(10)
-                .IsFixedLength();
+                .HasColumnType("sex_enum")
+                .IsRequired();;
             entity.Property(e => e.Street).HasMaxLength(100);
             entity.Property(e => e.Telephone).HasMaxLength(50);
         });

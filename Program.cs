@@ -1,8 +1,10 @@
 using fabsg0.Web.TeamManagement.Blazor.Components;
 using fabsg0.Web.TeamManagement.Blazor.Database;
+using fabsg0.Web.TeamManagement.Blazor.Entities;
 using fabsg0.Web.TeamManagement.Blazor.Providers;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using Npgsql;
 
 namespace fabsg0.Web.TeamManagement.Blazor;
 
@@ -20,8 +22,12 @@ internal class Program
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
 
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        dataSourceBuilder.MapEnum<Sex>();
+        var dataSource = dataSourceBuilder.Build();
+
         builder.Services.AddDbContext<TeamManagementContext>(options =>
-            options.UseNpgsql(connectionString));
+            options.UseNpgsql(dataSource));
         
         builder.Services.AddScoped<MemberProvider>();
         builder.Services.AddScoped<MembershipProvider>();

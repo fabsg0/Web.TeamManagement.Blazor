@@ -49,14 +49,14 @@
 
                     <div class="mb-3">
                         <label for="sex" class="form-label">Sex</label>
-                        <InputSelect id="sex" class="form-select text-capitalize" @bind-Value="Member.Sex">
+                        <InputSelect id="sex" class="form-select" @bind-Value="Member.Sex">
                             <option disabled value="">-- Select sex --</option>
-                            @foreach (var sex in _selectableSex)
+                            @foreach (var sex in Enum.GetValues(typeof(Sex)).Cast<Sex>())
                             {
                                 <option value="@sex">@sex</option>
                             }
                         </InputSelect>
-                        <ValidationMessage For="@(() => Member.Sex)"/>
+                        <ValidationMessage For="@(() => Member.Sex)" />
                     </div>
 
                     <div class="mb-3">
@@ -143,7 +143,6 @@
 
     private List<Department> _departments = [];
     private List<Guid> _selectedDepartmentIds = [];
-    private readonly List<string> _selectableSex = ["man", "woman"];
     private string activeTab = "personal";
 
     protected override async Task OnInitializedAsync()

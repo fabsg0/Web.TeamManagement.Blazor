@@ -51,7 +51,7 @@
                     HouseNumber = fields.ElementAtOrDefault(3)?.Trim(),
                     ZipCode = int.TryParse(fields.ElementAtOrDefault(4), out var zip) ? zip : 0,
                     City = fields.ElementAtOrDefault(5)?.Trim(),
-                    Sex = fields[6].Trim(),
+                    Sex = fields[6].Trim() == "Mann" ? Sex.Mann : Sex.Frau,
                     Birthdate = DateTime.TryParse(fields[7], out var dob)
                         ? DateOnly.FromDateTime(dob)
                         : default,

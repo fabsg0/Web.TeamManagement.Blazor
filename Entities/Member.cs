@@ -27,7 +27,7 @@ public partial class Member
 
     public string? Telephone { get; set; }
 
-    public string? Sex { get; set; }
+    public Sex Sex { get; set; }
 
     public virtual ICollection<DepartmentMember> DepartmentMembers { get; set; } = new List<DepartmentMember>();
 

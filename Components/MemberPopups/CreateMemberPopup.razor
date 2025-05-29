@@ -50,7 +50,7 @@
                         <label for="sex" class="form-label">Sex</label>
                         <InputSelect id="sex" class="form-select text-capitalize" @bind-Value="_member.Sex">
                             <option disabled selected value="">-- Select sex --</option>
-                            @foreach (var sex in _selectableSex)
+                            @foreach (var sex in Enum.GetValues(typeof(Sex)).Cast<Sex>())
                             {
                                 <option value="@sex">@sex</option>
                             }
@@ -144,7 +144,6 @@
     private readonly Member _member = new();
     private List<Department> _departments = [];
     private readonly List<Guid> _selectedDepartmentIds = [];
-    private readonly List<string> _selectableSex = ["man", "woman"];
     private string activeTab = "personal";
 
     protected override async Task OnInitializedAsync()
