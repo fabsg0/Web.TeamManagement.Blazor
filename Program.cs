@@ -2,6 +2,7 @@ using fabsg0.Web.TeamManagement.Blazor.Components;
 using fabsg0.Web.TeamManagement.Blazor.Database;
 using fabsg0.Web.TeamManagement.Blazor.Providers;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 
 namespace fabsg0.Web.TeamManagement.Blazor;
 
@@ -10,6 +11,8 @@ internal class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        
+        builder.Services.AddMudServices();
         
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

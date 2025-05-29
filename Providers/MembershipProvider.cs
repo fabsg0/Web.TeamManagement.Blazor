@@ -29,6 +29,7 @@ public class MembershipProvider(TeamManagementContext dbContext)
             if (member.MembershipFees.Any(x => x.Year == year)) continue;
 
             var age = year - member.Birthdate.Year;
+            if (age <= 0) continue;
             var feeDefinition = feeDefinitions.SingleOrDefault(x => x.MinAge <= age && x.MaxAge >= age);
 
             if (feeDefinition == null)

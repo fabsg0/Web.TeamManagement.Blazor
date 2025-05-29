@@ -10,126 +10,103 @@
 
 <PageTitle>Home - TeamManagement</PageTitle>
 
-<div class="container py-5">
+<MudContainer MaxWidth="MaxWidth.False" Class="px-4 py-6">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div class="d-flex align-items-center gap-3">
             <h2 class="mb-0 fw-bold text-primary">👥 Members</h2>
-            <select class="form-select form-select-sm w-auto shadow-sm rounded"
-                    @bind="_year"
-                    @bind:after="FetchData">
+            <MudSelect T="int" @bind-Value="_year" Dense Label="Year" Class="w-20" Immediate="true"
+                       OnValueChanged="async _ => await FetchData()">
                 @foreach (var year in _availableYears)
                 {
-                    <option value="@year">@year</option>
+                    <MudSelectItem Value="year">@year</MudSelectItem>
                 }
-            </select>
+            </MudSelect>
         </div>
 
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary shadow-sm" @onclick="@(() => _showCreateYearMembershipPopup = true)">
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => _showCreateYearMembershipPopup = true)">
                 ➕ Create Year-Membership
-            </button>
-            <button class="btn btn-success shadow-sm" @onclick="@(() => _showCreateMemberPopup = true)">
+            </MudButton>
+            <MudButton Color="Color.Success" OnClick="@(() => _showCreateMemberPopup = true)">
                 ➕ Add Member
-            </button>
-            <button class="btn btn-success shadow-sm" @onclick="@(() => _showImportPopup = true)">
+            </MudButton>
+            <MudButton Color="Color.Primary" OnClick="@(() => _showImportPopup = true)">
                 ➕ Import Members
-            </button>
+            </MudButton>
         </div>
     </div>
 
     @if (_isLoading)
     {
-        <div class="d-flex justify-content-center my-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mx-auto my-10"/>
     }
     else
     {
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-0">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-uppercase small text-muted">
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Address</th>
-                        <th>Departments</th>
-                        <th>Membership</th>
-                        <th>Birthdate</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var member in _members)
-                    {
-                        <tr class="@(_selectedMember == member ? "table-primary" : "")"
-                            @onclick="@(() => _selectedMember = member)">
-                            <td>@member.Id</td>
-                            <td class="fw-medium">@member.FirstName @member.LastName</td>
-                            <td>
-                                @member.Street @member.HouseNumber<br/>
-                                <span class="text-muted small">@member.ZipCode @member.City</span>
-                            </td>
-                            <td>
-                                @if (member.DepartmentMemberships != null)
-                                {
-                                    foreach (var department in member.DepartmentMemberships)
-                                    {
-                                        if (department.Department != null)
-                                        {
-                                            <span
-                                                class="badge bg-@department.Department.Color me-1">@department.Department.Name</span>
-                                        }
-                                    }
-                                }
-                            </td>
-                            <td>
-                                @if (member.CurrentMembershipFee is not null)
-                                {
-                                    <button class="btn btn-sm fw-semibold text-white px-3"
-                                            style="background-color: @(member.CurrentMembershipFee.IsPaid ? "#198754" : "#dc3545")"
-                                            @onclick="@(() => ChangePaymentStatus(member.Id))">
-                                        @(member.CurrentMembershipFee.IsPaid ? "Paid" : "Not Paid")
-                                    </button>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Unknown</span>
-                                }
-                            </td>
-                            <td>@member.BirthDate.ToString("dd.MM.yyyy")</td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary" title="Edit"
-                                            @onclick="@(() =>
-                                                      {
-                                                          _selectedMember = member;
-                                                          _showUpdateMemberPopup = true;
-                                                      })">
-                                        🖊️
-                                    </button>
-                                    <button class="btn btn-outline-danger" title="Delete"
-                                            @onclick="@(() =>
-                                                      {
-                                                          _selectedMember = member;
-                                                          _showDeleteMemberPopup = true;
-                                                      })">
-                                        🗑️
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    }
-</div>
+        <MudDataGrid T="MemberModel" Items="@_members" MultiSelection="true"
+                     SortMode="SortMode.Multiple" Filterable="true" Class="border rounded shadow-sm">
 
-@* POPUPS *@
+            <Columns>
+                <SelectColumn T="MemberModel"/>
+                <PropertyColumn Property="x => x.Id" Title="#"/>
+                <PropertyColumn Property="x => x.FirstName" Title="First Name"/>
+                <PropertyColumn Property="x => x.LastName" Title="Last Name"/>
+                <TemplateColumn T="MemberModel" Title="Membership">
+                    <CellTemplate>
+                        @{
+                            var member = context.Item;
+                        }
+
+                        @if (member.CurrentMembershipFee is not null)
+                        {
+                            <MudButton Size="Size.Small"
+                                       Color="@(member.CurrentMembershipFee.IsPaid ? Color.Success : Color.Error)"
+                                       OnClick="@(() => ChangePaymentStatus(member.Id))"
+                                       Class="me-2">
+                                @(member.CurrentMembershipFee.IsPaid ? "Paid" : "Not Paid")
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudChip Color="Color.Default" Variant="Variant.Outlined" Class="me-2">Unknown</MudChip>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.BirthDate" Title="Birthdate" Format="dd.MM.yyyy"/>
+                <TemplateColumn T="MemberModel" Title="Actions" Align="Align.Right">
+                    <CellTemplate>
+                        @{
+                            var member = context.Item;
+                        }
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       OnClick="@(() =>
+                                                {
+                                                    _selectedMember = member;
+                                                    _showUpdateMemberPopup = true;
+                                                })"/>
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() =>
+                                                {
+                                                    _selectedMember = member;
+                                                    _showDeleteMemberPopup = true;
+                                                })"/>
+                    </CellTemplate>
+                </TemplateColumn>
+
+            </Columns>
+
+            <PagerContent>
+                <MudDataGridPager T="MemberModel"/>
+            </PagerContent>
+        </MudDataGrid>
+    }
+</MudContainer>
+
 @if (_showCreateMemberPopup)
 {
     <CreateMemberPopup OnClose="async () => { _showCreateMemberPopup = false; await FetchData(); }"/>
@@ -148,7 +125,6 @@
 {
     <CreateYearMembershipPopup OnClose="async () => { _showCreateYearMembershipPopup = false; await FetchData(); }"/>
 }
-
 @if (_showImportPopup)
 {
     <MemberImportPopup OnClose="async () => { _showImportPopup = false; await FetchData(); }"/>
