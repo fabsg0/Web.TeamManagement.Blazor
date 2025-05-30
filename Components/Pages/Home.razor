@@ -3,9 +3,11 @@
 @using fabsg0.Web.TeamManagement.Blazor.Components.MembershipPopups
 @using fabsg0.Web.TeamManagement.Blazor.Models
 @using fabsg0.Web.TeamManagement.Blazor.Providers
+@using Microsoft.AspNetCore.WebUtilities
 @inject MemberProvider MemberProvider
 @inject MembershipProvider MembershipProvider
 @inject ILogger<Home> Logger
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Home - TeamManagement</PageTitle>
@@ -14,8 +16,8 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div class="d-flex align-items-center gap-3">
             <h2 class="mb-0 fw-bold text-primary">👥 Members</h2>
-            <MudSelect T="int" @bind-Value="_year" Dense Label="Year" Class="w-20" Immediate="true"
-                       OnValueChanged="async _ => await FetchData()">
+            <MudSelect T="int" Value="_year" Dense Label="Year" Class="w-20" Immediate="true"
+                       ValueChanged="OnYearChanged">
                 @foreach (var year in _availableYears)
                 {
                     <MudSelectItem Value="year">@year</MudSelectItem>
@@ -40,16 +42,39 @@
     {
         <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mx-auto my-10"/>
     }
-    else
+    else if (_isInitialized)
     {
-        <MudDataGrid T="MemberModel" Items="@_members" MultiSelection="true"
-                     SortMode="SortMode.Multiple" Filterable="true" Class="border rounded shadow-sm">
+        <MudDataGrid T="MemberModel"
+                     Items="@_members"
+                     MultiSelection="true"
+                     CurrentPage="_currentPage"
+                     CurrentPageChanged="OnPageChanged"
+                     SortMode="SortMode.Multiple"
+                     Filterable="true"
+                     Class="border rounded shadow-sm">
 
             <Columns>
                 <SelectColumn T="MemberModel"/>
                 <PropertyColumn Property="x => x.Id" Title="#"/>
                 <PropertyColumn Property="x => x.FirstName" Title="First Name"/>
                 <PropertyColumn Property="x => x.LastName" Title="Last Name"/>
+                <TemplateColumn T="MemberModel" Title="Departments">
+                    <CellTemplate>
+                        @{
+                            var member = context.Item;
+                        }
+
+                        @if (member.DepartmentMemberships != null)
+                        {
+                            foreach (var department in member.DepartmentMemberships)
+                            {
+                                if (department.Department == null) continue;
+                                <span
+                                    Class="badge bg-@department.Department.Color me-1">@department.Department.Name</span>
+                            }
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
                 <TemplateColumn T="MemberModel" Title="Membership">
                     <CellTemplate>
                         @{
@@ -133,6 +158,7 @@
 @code {
     private List<MemberModel> _members = [];
     private bool _isLoading;
+    private bool _isInitialized = false;
     private bool _showCreateMemberPopup;
     private bool _showUpdateMemberPopup;
     private bool _showDeleteMemberPopup;
@@ -140,12 +166,31 @@
     private bool _showCreateYearMembershipPopup;
     private MemberModel _selectedMember = new();
 
+    private int _currentPage = 0;
     private int _year = DateTime.UtcNow.Year;
     private List<int> _availableYears = [];
 
     protected override async Task OnInitializedAsync()
     {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var queryParameters = QueryHelpers.ParseQuery(uri.Query);
+
+        if (queryParameters.TryGetValue("year", out var yearParam) && int.TryParse(yearParam, out var parsedYear))
+        {
+            _year = parsedYear;
+        }
+        else
+        {
+            _year = DateTime.UtcNow.Year;
+        }
+
+        if (queryParameters.TryGetValue("page", out var pageParam) && int.TryParse(pageParam, out var parsedPage))
+        {
+            _currentPage = parsedPage;
+        }
+
         await FetchData();
+        _isInitialized = true;
     }
 
     private async Task FetchData()
@@ -164,6 +209,34 @@
         {
             _isLoading = false;
         }
+    }
+
+    private async Task OnYearChanged(int newYear)
+    {
+        _year = newYear;
+        UpdateQueryParameters();
+        await FetchData();
+    }
+
+    private void OnPageChanged(int newPage)
+    {
+        _currentPage = newPage;
+        UpdateQueryParameters();
+    }
+
+    private void UpdateQueryParameters()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        var baseUri = uri.GetLeftPart(UriPartial.Path);
+
+        var query = new Dictionary<string, string>
+        {
+            ["year"] = _year.ToString(),
+            ["page"] = _currentPage.ToString()
+        };
+
+        var newUri = QueryHelpers.AddQueryString(baseUri, query!);
+        NavigationManager.NavigateTo(newUri, forceLoad: false);
     }
 
     private async Task ChangePaymentStatus(Guid memberId)
