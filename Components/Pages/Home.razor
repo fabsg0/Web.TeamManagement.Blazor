@@ -51,7 +51,18 @@
                      CurrentPageChanged="OnPageChanged"
                      SortMode="SortMode.Multiple"
                      Filterable="true"
+                     QuickFilter="@_quickFilter"
                      Class="border rounded shadow-sm">
+            <ToolBarContent>
+                <MudSpacer/>
+                <MudTextField @bind-Text="_searchString" 
+                              Placeholder="Search" 
+                              Adornment="Adornment.Start"
+                              Immediate="true" 
+                              AdornmentIcon="@Icons.Material.Filled.Search" 
+                              IconSize="Size.Medium"
+                              Class="mt-0"/>
+            </ToolBarContent>
 
             <Columns>
                 <SelectColumn T="MemberModel"/>
@@ -166,9 +177,22 @@
     private bool _showCreateYearMembershipPopup;
     private MemberModel _selectedMember = new();
 
+    private string _searchString;
     private int _currentPage = 0;
     private int _year = DateTime.UtcNow.Year;
     private List<int> _availableYears = [];
+
+    private Func<MemberModel, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString)) return true;
+        if (x.FirstName.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (x.LastName.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (x.Street != null && x.Street.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (x.ZipCode != 0 && x.ZipCode.ToString()!.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (x.BirthDate.ToString("dd.MM.yyyy").Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+
+        return false;
+    };
 
     protected override async Task OnInitializedAsync()
     {

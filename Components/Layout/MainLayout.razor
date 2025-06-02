@@ -2,25 +2,52 @@
 
 <MudThemeProvider />
 <MudPopoverProvider />
+<MudSnackbarProvider />
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
+<MudLayout>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+    <MudLayout.AppBar>
+        <MudAppBar Color="Color.Primary" Elevation="1">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                           Color="Color.Inherit"
+                           Edge="Edge.Start"
+                           OnClick="ToggleDrawer" />
+            <MudText Typo="Typo.h6" Class="ml-2">Team Management</MudText>
+        </MudAppBar>
+    </MudLayout.AppBar>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    <MudLayout.Drawer>
+        <MudDrawer @bind-Open="_drawerOpen"
+                   ClipMode="DrawerClipMode.Always"
+                   Variant="DrawerVariant.Responsive"
+                   Elevation="1"
+                   Class="mud-width-260">
+            <MudNavMenu>
+                <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+                    Home
+                </MudNavLink>
+                <MudNavLink Href="/departments" Icon="@Icons.Material.Filled.Groups">
+                    Departments
+                </MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+    </MudLayout.Drawer>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+    <MudLayout.MainContent>
+        <MudMainContent Class="pt-4">
+            <div class="mt-3 pt-5">
+                @Body
+            </div>
+        </MudMainContent>
+    </MudLayout.MainContent>
+
+</MudLayout>
+
+@code {
+    private bool _drawerOpen;
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}

@@ -8,68 +8,55 @@
 
 <PageTitle>Departments - TeamManagement</PageTitle>
 
-<div class="container py-5">
+<MudContainer MaxWidth="MaxWidth.False" Class="px-4 py-6">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <h2 class="mb-0 fw-bold text-primary">🏢 Departments</h2>
-        <button class="btn btn-success shadow-sm" @onclick="@(() => _showCreateDepartmentPopup = true)">
+        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@(() => _showCreateDepartmentPopup = true)">
             ➕ Add Department
-        </button>
+        </MudButton>
     </div>
 
     @if (_isLoading)
     {
-        <div class="d-flex justify-content-center my-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mx-auto my-10" />
     }
     else
     {
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-0">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-uppercase small text-muted">
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var department in _departments)
-                    {
-                        <tr>
-                            <td>@department.Id</td>
-                            <td>
-                                <span class="badge bg-@department.Color">@department.Name</span>
-                            </td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary" title="Edit"
-                                            @onclick="@(() =>
-                                                      {
-                                                          _selectedDepartment = department;
-                                                          _showUpdateDepartmentPopup = true;
-                                                      })">
-                                        🖊️
-                                    </button>
-                                    <button class="btn btn-outline-danger" title="Delete"
-                                            @onclick="@(() =>
-                                                      {
-                                                          _selectedDepartment = department;
-                                                          _showDeleteDepartmentPopup = true;
-                                                      })">
-                                        🗑️
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <MudDataGrid T="Department"
+                     Items="_departments"
+                     Class="border rounded shadow-sm"
+                     Hover="true"
+                     Filterable="true"
+                     Breakpoint="Breakpoint.Sm">
+            <Columns>
+                <PropertyColumn Property="x => x.Id" Title="#" />
+                <TemplateColumn Title="Name">
+                    <CellTemplate>
+                        <span
+                             Class="badge bg-@context.Item.Color me-1">@context.Item.Name</span>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Actions" Align="Align.Right">
+                    <CellTemplate>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small"
+                                       OnClick="@(() =>
+                                                {
+                                                    _selectedDepartment = context.Item;
+                                                    _showUpdateDepartmentPopup = true;
+                                                })" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
+                                       OnClick="@(() =>
+                                                {
+                                                    _selectedDepartment = context.Item;
+                                                    _showDeleteDepartmentPopup = true;
+                                                })" />
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Department" />
+            </PagerContent>
+        </MudDataGrid>
     }
 
     @if (_showCreateDepartmentPopup)
@@ -78,7 +65,7 @@
         {
             _showCreateDepartmentPopup = false;
             await FetchData();
-        }"/>
+        }" />
     }
 
     @if (_showUpdateDepartmentPopup)
@@ -87,7 +74,7 @@
         {
             _showUpdateDepartmentPopup = false;
             await FetchData();
-        }"/>
+        }" />
     }
 
     @if (_showDeleteDepartmentPopup)
@@ -96,9 +83,9 @@
         {
             _showDeleteDepartmentPopup = false;
             await FetchData();
-        }"/>
+        }" />
     }
-</div>
+</MudContainer>
 
 @code {
     private List<Department> _departments = [];
@@ -130,5 +117,4 @@
             _isLoading = false;
         }
     }
-
 }
