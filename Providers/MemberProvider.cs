@@ -105,4 +105,36 @@ public class MemberProvider(TeamManagementContext dbContext, MembershipProvider 
         dbContext.Members.RemoveRange(members);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<List<MemberModel>> ExportMembers(CancellationToken cancellationToken = default)
+    {
+        var members = await dbContext.Members
+            .AsNoTracking()
+            .Include(x => x.DepartmentMembers)                      // include join table
+            .ThenInclude(dm => dm.Department)                   // include related department
+            .Include(x => x.MembershipFees)                         // include all fees
+            .ThenInclude(fee => fee.MemberhsipFeeDefinition)    // include fee definition
+            .Select(x => new MemberModel
+            {
+                Id = x.Id,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                Sex = x.Sex,
+                BirthDate = x.Birthdate,
+                Email = x.Email,
+                Telephone = x.Telephone,
+                Street = x.Street,
+                HouseNumber = x.HouseNumber,
+                ZipCode = x.ZipCode,
+                City = x.City,
+                UpdatedAt = x.UpdatedAt,
+                DepartmentMemberships = x.DepartmentMembers.ToList(),
+                CurrentMembershipFee = x.MembershipFees
+                    .OrderByDescending(y => y.Year)
+                    .FirstOrDefault()!
+            })
+            .ToListAsync(cancellationToken);
+
+        return members;
+    }
 }

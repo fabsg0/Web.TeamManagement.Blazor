@@ -18,4 +18,12 @@ public class MemberModel
     public DateTimeOffset? UpdatedAt { get; set; }
     public List<DepartmentMember>? DepartmentMemberships { get; set; }
     public MembershipFee CurrentMembershipFee { get; set; }
+
+    public string PrimaryDepartmentName =>
+        DepartmentMemberships?
+            .Where(x => x.Department != null)
+            .Select(x => x.Department!.Name)
+            .OrderBy(name => name)
+            .FirstOrDefault() ?? string.Empty;
+
 }

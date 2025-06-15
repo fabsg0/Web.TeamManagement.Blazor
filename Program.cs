@@ -33,6 +33,8 @@ internal class Program
         builder.Services.AddScoped<MembershipProvider>();
         builder.Services.AddScoped<DepartmentProvider>();
 
+        builder.Services.AddControllers();
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -45,7 +47,8 @@ internal class Program
 
         app.UseHttpsRedirection();
 
-
+        app.MapControllers();
+        
         app.UseAntiforgery();
 
         app.UseStaticFiles();

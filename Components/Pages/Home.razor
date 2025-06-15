@@ -8,6 +8,7 @@
 @inject MembershipProvider MembershipProvider
 @inject ILogger<Home> Logger
 @inject NavigationManager NavigationManager
+@inject IJSRuntime Js
 @rendermode InteractiveServer
 
 <PageTitle>Home - TeamManagement</PageTitle>
@@ -23,6 +24,10 @@
                     <MudSelectItem Value="year">@year</MudSelectItem>
                 }
             </MudSelect>
+            
+            <MudButton OnClick="ExportExcel" StartIcon="@Icons.Material.Filled.Download">
+                Export to Excel
+            </MudButton>
         </div>
 
         <div class="d-flex gap-2">
@@ -69,7 +74,7 @@
                 <PropertyColumn Property="x => x.Id" Title="#"/>
                 <PropertyColumn Property="x => x.FirstName" Title="First Name"/>
                 <PropertyColumn Property="x => x.LastName" Title="Last Name"/>
-                <TemplateColumn T="MemberModel" Title="Departments">
+                <TemplateColumn T="MemberModel" SortBy="x => x.PrimaryDepartmentName" Title="Departments" Sortable="true" Filterable="true">
                     <CellTemplate>
                         @{
                             var member = context.Item;
@@ -177,6 +182,8 @@
     private bool _showCreateYearMembershipPopup;
     private MemberModel _selectedMember = new();
 
+    private Guid? _selectedDepartmentId;
+
     private string _searchString;
     private int _currentPage = 0;
     private int _year = DateTime.UtcNow.Year;
@@ -184,15 +191,22 @@
 
     private Func<MemberModel, bool> _quickFilter => x =>
     {
-        if (string.IsNullOrWhiteSpace(_searchString)) return true;
-        if (x.FirstName.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
-        if (x.LastName.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
-        if (x.Street != null && x.Street.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
-        if (x.ZipCode != 0 && x.ZipCode.ToString()!.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
-        if (x.BirthDate.ToString("dd.MM.yyyy").Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        var matchesSearch = string.IsNullOrWhiteSpace(_searchString) ||
+                            x.FirstName.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+                            x.LastName.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+                            (!string.IsNullOrWhiteSpace(x.Street) && x.Street.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) ||
+                            (x.ZipCode != null && x.ZipCode.ToString()!.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) ||
+                            x.BirthDate.ToString("dd.MM.yyyy").Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+                            (x.DepartmentMemberships != null && x.DepartmentMemberships.Any(dm =>
+                                dm.Department != null &&
+                                dm.Department.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase)));
 
-        return false;
+        var matchesDepartment = !_selectedDepartmentId.HasValue ||
+                                (x.DepartmentMemberships?.Any(dm => dm.Department?.Id == _selectedDepartmentId.Value) ?? false);
+
+        return matchesSearch && matchesDepartment;
     };
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -233,6 +247,12 @@
         {
             _isLoading = false;
         }
+    }
+
+    private void ExportExcel()
+    {
+        var url = NavigationManager.BaseUri + "api/exportMembers";
+        Js.InvokeVoidAsync("open", url, "_blank");
     }
 
     private async Task OnYearChanged(int newYear)
